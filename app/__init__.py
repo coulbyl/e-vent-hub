@@ -6,6 +6,7 @@ from flask import Flask, jsonify
 from flask_restful import Resource, Api
 from flask_jwt_extended import JWTManager
 from routes import ROUTES
+from app.models.token import TokenBlockList
 
 load_dotenv(f"{os.getcwd()}/.env")
 
@@ -27,7 +28,10 @@ jwt = JWTManager(app)
 
 @jwt.token_in_blocklist_loader
 def check_if_token_revoked(jwt_header, jwt_payload):
-    pass
+    jti = jwt_payload["jti"]
+    token = TokenBlockList.find_by_jti(jti=jti)
+    print('--token-- ', token)
+    return token is not None
 
 
 @jwt.user_identity_loader
