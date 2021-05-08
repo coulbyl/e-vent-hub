@@ -18,5 +18,3 @@ put_parser.add_argument('active', type=bool, required=True, help=_help)
 
 active_parser = reqparse.RequestParser()
 active_parser.add_argument('active', type=bool, required=True, help=_help)
-
-favorite_parser = reqparse.RequestParser()

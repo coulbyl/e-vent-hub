@@ -3,8 +3,8 @@ from datetime import datetime
 from werkzeug.security import generate_password_hash
 from utils import json_dump_
 
-user_events = db.Table(
-    'user_events',
+favourite_events = db.Table(
+    'favourite_events',
     db.Column(
         'user_id', db.Integer, db.ForeignKey('users._id'),
         primary_key=True),
@@ -15,11 +15,7 @@ user_events = db.Table(
 
 
 class UserModel(db.Model):
-    """ 
-    User model class to easily manage user data. 
-
-    Note -> The user can have only one of the following roles: [superuser, admin, organizer, client].
-    """
+    """ User model class to easily manage user data. """
     __tablename__ = 'users'
 
     _id = db.Column(db.Integer, primary_key=True)
@@ -29,11 +25,17 @@ class UserModel(db.Model):
     password = db.Column(db.String(120), nullable=False)
     contacts = db.Column(db.String(120), nullable=False)
     photo = db.Column(db.String(120))
-    user_events = db.relationship(
-        'EventModel', secondary=user_events,
-        lazy='subquery',  backref=db.backref('users', lazy=True))
+
+    favourite_events = db.relationship(
+        'EventModel',
+        secondary=favourite_events,
+        lazy='subquery',
+        backref=db.backref('users', lazy=True)
+    )
+
     active = db.Column(db.Boolean, default=True, nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+    updated_at = db.Column(db.DateTime)
 
     def __init__(self, firstname, lastname, email, password, contacts, photo):
         self.firstname = firstname
@@ -52,9 +54,20 @@ class UserModel(db.Model):
             'email': self.email,
             'contacts': self.contacts,
             'photo': self.photo,
-            'user_events': self.user_events,
+            'favourite_events': [{
+                '_id': favourite._id,
+                'name': favourite.name,
+                'location': favourite.location,
+                'description': favourite.description,
+                'price': favourite.price,
+                'available_places': favourite.available_places,
+                'remaining_places': favourite.remaining_places,
+                'start_at': favourite.start_at,
+                'end_at': favourite.end_at,
+                'image': favourite.image} for favourite in self.favourite_events],
             'active': self.active,
-            'created_at': json_dump_(self.created_at)
+            'created_at': json_dump_(self.created_at),
+            'updated_at': json_dump_(self.updated_at)
         }
 
     @classmethod
@@ -82,12 +95,11 @@ class UserModel(db.Model):
         db.session.delete(self)
         db.session.commit()
 
-    def add_favorite(self, Event):
-        event = Event()
-        user = self()
-        user.user_events.append(event)
-        db.session.add(user)
+    def add_favourite(self, event):
+        self.favourite_events.append(event)
+        db.session.add(self)
         db.session.commit()
 
-    def remove_favorite(self, Event):
-        pass
+    def remove_favourite(self, event):
+        self.favourite_events.remove(event)
+        db.session.commit()

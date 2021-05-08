@@ -3,6 +3,7 @@ from app.models.organizer import OrganizerModel
 from app.parsers.organizer import post_parser, put_parser, reset_parser, login_parser
 from flask_jwt_extended import jwt_required, create_access_token, create_refresh_token
 from werkzeug.security import check_password_hash, generate_password_hash, safe_str_cmp
+from datetime import datetime
 
 # Error message
 ACCOUNT_DOES_NOT_EXIST = "Désolé, le compte ({}) n'existe pas."
@@ -57,9 +58,21 @@ class Organizer(Resource):
             organizer_found.email = data.email
             organizer_found.contacts = data.contacts
             organizer_found.photo = data.photo
+            organizer_found.updated_at = datetime.utcnow()
 
             organizer_found.save()
             return {'messsage': ACCOUNT_SUCCESSFULLY_UPDATED}
+
+        abort(400, message=ACCOUNT_DOES_NOT_EXIST.format(_id))
+
+    @classmethod
+    @jwt_required()
+    def delete(cls, _id: int):
+        """ /organizer/<_id:int> - Delete a organizer."""
+        organizer_found = OrganizerModel.find_by_id(_id=_id)
+        if organizer_found:
+            organizer_found.delete()
+            return {'message': ACCOUNT_SUCCESSFULLY_DELETED}
 
         abort(400, message=ACCOUNT_DOES_NOT_EXIST.format(_id))
 
@@ -84,6 +97,7 @@ class OrganizerPasswordReset(Resource):
                 organizer_found.password, data.old_password)
             if is_same and safe_str_cmp(data.new_password, data.confirm_password):
                 organizer_found.password = generate_password_hash(data.new_password)
+                organizer_found.updated_at = datetime.utcnow()
                 organizer_found.save()
                 return {'messsage': 'Mot de passe réinitialisé avec succès.'}
             abort(400, message="Un problème est survenu. Vérifiez votre mot de passe.")
