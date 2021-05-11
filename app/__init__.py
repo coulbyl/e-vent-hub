@@ -5,8 +5,13 @@ from datetime import timedelta
 from flask import Flask, jsonify
 from flask_restful import Resource, Api
 from flask_jwt_extended import JWTManager
+
 from routes import ROUTES
+
 from app.models.token import TokenBlockList
+from app.models.admin import AdminModel
+from app.models.organizer import OrganizerModel
+from app.models.user import UserModel
 
 load_dotenv(f"{os.getcwd()}/.env")
 
@@ -30,13 +35,25 @@ jwt = JWTManager(app)
 def check_if_token_revoked(jwt_header, jwt_payload):
     jti = jwt_payload["jti"]
     token = TokenBlockList.find_by_jti(jti=jti)
-    print('--token-- ', token)
     return token is not None
 
 
 @jwt.user_identity_loader
 def add_claims_to_jwt(identity):
-    pass
+    admin = AdminModel.find_by_uuid(_uuid=identity)
+    organizer = OrganizerModel.find_by_uuid(_uuid=identity)
+    client = UserModel.find_by_uuid(_uuid=identity)
+
+    if admin and admin.role == 'superuser':
+        return {'superuser': True, 'admin': False, 'organizer': False, 'client': False}
+    elif admin and admin.role == 'admin':
+        return {'superuser': True, 'admin': True, 'organizer': True, 'client': False}
+    elif organizer:
+        return {'superuser': False, 'admin': False, 'organizer': True, 'client': False}
+    elif client:
+        return {'superuser': False, 'admin': False, 'organizer': False, 'client': True}
+    else:
+        return {'superuser': False, 'admin': False, 'organizer': False, 'client': False}
 
 
 @jwt.expired_token_loader

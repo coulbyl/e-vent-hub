@@ -1,7 +1,7 @@
 from db import db
 from datetime import datetime
 from werkzeug.security import generate_password_hash
-from utils import json_dump_
+from utils import json_dump_, generate_uuid
 
 
 class AdminModel(db.Model):
@@ -13,6 +13,7 @@ class AdminModel(db.Model):
     __tablename__ = 'admins'
 
     _id = db.Column(db.Integer, primary_key=True)
+    _uuid = db.Column(db.String(11), unique=True, default=f"ad_{generate_uuid()}")
     username = db.Column(db.String(80), nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
     password = db.Column(db.String(120), nullable=False)
@@ -51,6 +52,11 @@ class AdminModel(db.Model):
     def find_by_id(cls, _id: int, active=True):
         """ Find a admin by his ID in the database. """
         return cls.query.filter_by(_id=_id).filter_by(active=active).first()
+
+    @classmethod
+    def find_by_uuid(cls, _uuid: int, active=True):
+        """ Find a admin by his ID in the database. """
+        return cls.query.filter_by(_uuid=_uuid).filter_by(active=active).first()
 
     @classmethod
     def find_all(cls, active=True):

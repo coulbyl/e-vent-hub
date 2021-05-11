@@ -1,7 +1,7 @@
 from flask_restful import Resource, abort
 from app.models.event import EventModel
 from app.models.user import UserModel
-from app.parsers.event import post_parser, put_parser, active_parser
+from app.parsers.event import post_parser, put_parser, active_parser, allow_parser
 from datetime import datetime
 
 # Error message
@@ -118,3 +118,28 @@ class EventUnpublishedList(Resource):
     @classmethod
     def get(cls):
         return {'events': [event.json() for event in EventModel.find_all(active=False)]}
+
+
+class EventAuthorization(Resource):
+    @classmethod
+    def put(cls, _id: int):
+        """ /event/authorization/<int:_id>"""
+        claims = get_jwt_identity()
+        if not claims['is_superuser']:
+            return {'message': 'Admin privilege required.'}, 401
+
+        event_found = EventModel.find_without_active(_id=_id)
+        if event_found:
+            data = allow_parser.parse_args(strict=True)
+            event_found.allow = data.allow
+            event_found.updated_at = datetime.utcnow()
+            event_found.save()
+            return {'messsage': EVENT_SUCCESSFULLY_UPDATED}
+        abort(400, message=EVENT_DOES_NOT_EXIST.format(_id))
+
+
+class EventUnauthorizedList(Resource):
+    """ /events/unauthorized - Get unauthorized events"""
+    @classmethod
+    def get(cls):
+        return {'events': [event.json() for event in EventModel.find_allow(False)]}

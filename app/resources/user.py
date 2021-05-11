@@ -10,6 +10,8 @@ from app.models.token import TokenBlockList
 from app.parsers.user import post_parser, put_parser, reset_parser, login_parser
 from werkzeug.security import check_password_hash, safe_str_cmp, generate_password_hash
 from datetime import datetime
+from app.schema.user import UserSchema
+from app.schema.event import EventSchema
 
 from flask import jsonify, make_response
 
@@ -34,8 +36,8 @@ class UserRegister(Resource):
         # Store user and generate access_token
         user = UserModel(**data)
         user.save()
-        access_token = create_access_token(identity=user._id, fresh=True)
-        refresh_token = create_refresh_token(identity=user._id)
+        access_token = create_access_token(identity=user._uuid, fresh=True)
+        refresh_token = create_refresh_token(identity=user._uuid)
 
         return {
             'user': user.json(),
@@ -71,9 +73,12 @@ class UserFavouriteEvent(Resource):
         abort(404, message=USER_DOES_NOT_EXIST.format(user_id))
 
 
+#user_schema = UserSchema()
+
+
 class User(Resource):
     @classmethod
-    @jwt_required()
+    # @jwt_required()
     def get(cls, _id: int):
         """ /user/<_id:int> - Get a user."""
         user = UserModel.find_by_id(_id=_id)
@@ -82,8 +87,8 @@ class User(Resource):
             abort(404, message=USER_DOES_NOT_EXIST.format(_id))
         return user.json()
 
-    @classmethod
-    @jwt_required()
+    @ classmethod
+    @ jwt_required()
     def put(cls, _id: int):
         """ /user/<_id:int> - Update a user."""
         user_found = UserModel.find_by_id(_id=_id)
@@ -102,8 +107,8 @@ class User(Resource):
 
         abort(400, message=USER_DOES_NOT_EXIST.format(_id))
 
-    @classmethod
-    @jwt_required()
+    @ classmethod
+    @ jwt_required()
     def delete(cls, _id: int):
         """ /user/<_id:int> - Delete a user."""
         user_found = UserModel.find_by_id(_id=_id)
@@ -116,16 +121,16 @@ class User(Resource):
 
 class UserList(Resource):
     """ /users - Get all users - (superuser)"""
-    @classmethod
-    @jwt_required()  # admin claims
+    @ classmethod
+    # @jwt_required()  # admin claims
     def get(cls):
         return {'users': [user.json() for user in UserModel.find_all()]}
 
 
 class UserPasswordReset(Resource):
     """ /reset-password/<_id> - Reset user password"""
-    @classmethod
-    @jwt_required()
+    @ classmethod
+    @ jwt_required()
     def put(cls, _id: int):
         user_found = UserModel.find_by_id(_id=_id)
         if user_found:
@@ -142,14 +147,14 @@ class UserPasswordReset(Resource):
 
 class UserLogin(Resource):
     """ /login - Login a user """
-    @classmethod
+    @ classmethod
     def post(cls):
         data: dict = login_parser.parse_args()
         user = UserModel.find_by_email(email=data.email)
 
         if user and check_password_hash(user.password, data.password):
-            access_token = create_access_token(identity=user._id, fresh=True)
-            refresh_token = create_refresh_token(identity=user._id)
+            access_token = create_access_token(identity=user._uuid, fresh=True)
+            refresh_token = create_refresh_token(identity=user._uuid)
 
             return {
                 "user": user.json(),

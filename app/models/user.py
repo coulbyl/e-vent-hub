@@ -1,7 +1,7 @@
 from db import db
 from datetime import datetime
 from werkzeug.security import generate_password_hash
-from utils import json_dump_
+from utils import json_dump_, generate_uuid
 
 favourite_events = db.Table(
     'favourite_events',
@@ -19,6 +19,7 @@ class UserModel(db.Model):
     __tablename__ = 'users'
 
     _id = db.Column(db.Integer, primary_key=True)
+    _uuid = db.Column(db.String(11), unique=True, default=f"us_{generate_uuid()}")
     firstname = db.Column(db.String(80), nullable=False)
     lastname = db.Column(db.String(80), nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
@@ -27,11 +28,7 @@ class UserModel(db.Model):
     photo = db.Column(db.String(120))
 
     favourite_events = db.relationship(
-        'EventModel',
-        secondary=favourite_events,
-        lazy='subquery',
-        backref=db.backref('users', lazy=True)
-    )
+        'EventModel', secondary=favourite_events, lazy='subquery')
 
     active = db.Column(db.Boolean, default=True, nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
@@ -46,7 +43,9 @@ class UserModel(db.Model):
         self.photo = photo
 
     def json(self):
-        """ Use to format the user object in json. """
+        from app.schema.event import EventSchema
+        events_schema = EventSchema(many=True)
+
         return {
             '_id': self._id,
             'firstname': self.firstname,
@@ -54,17 +53,7 @@ class UserModel(db.Model):
             'email': self.email,
             'contacts': self.contacts,
             'photo': self.photo,
-            'favourite_events': [{
-                '_id': favourite._id,
-                'name': favourite.name,
-                'location': favourite.location,
-                'description': favourite.description,
-                'price': favourite.price,
-                'available_places': favourite.available_places,
-                'remaining_places': favourite.remaining_places,
-                'start_at': favourite.start_at,
-                'end_at': favourite.end_at,
-                'image': favourite.image} for favourite in self.favourite_events],
+            'favourite_events': events_schema.dump(self.favourite_events),
             'active': self.active,
             'created_at': json_dump_(self.created_at),
             'updated_at': json_dump_(self.updated_at)
@@ -79,6 +68,10 @@ class UserModel(db.Model):
     def find_by_id(cls, _id: int, active=True):
         """ Find a user by his ID in the database. """
         return cls.query.filter_by(_id=_id).filter_by(active=active).first()
+
+    @classmethod
+    def find_by_uuid(cls, _uuid: int, active=True):
+        return cls.query.filter_by(_uuid=_uuid).filter_by(active=active).first()
 
     @classmethod
     def find_all(cls, active=True):

@@ -28,20 +28,17 @@ class EventModel(db.Model):
     end_at = db.Column(db.String(80), nullable=False)
     image = db.Column(db.String(120))
     active = db.Column(db.Boolean, default=False, nullable=False)
+    allow = db.Column(db.Boolean, default=True, nullable=False)
 
     organizer_id = db.Column(
         db.Integer,
         db.ForeignKey('organizers._id'),
         nullable=False
     )
-    organizer = db.relationship('OrganizerModel', back_populates="events")
+    # organizer = db.relationship('OrganizerModel', back_populates="events")
 
     participants = db.relationship(
-        'UserModel',
-        secondary=participant_events,
-        lazy='subquery',
-        backref=db.backref('events', lazy='dynamic')
-    )
+        'UserModel', secondary=participant_events, lazy='subquery')
 
     created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
     updated_at = db.Column(db.DateTime)
@@ -62,6 +59,9 @@ class EventModel(db.Model):
         self.organizer_id = organizer_id
 
     def json(self):
+        from app.schema.user import UserSchema
+        users_schema = UserSchema(many=True)
+
         return {
             '_id': self._id,
             'name': self.name,
@@ -74,27 +74,30 @@ class EventModel(db.Model):
             'end_at': self.end_at,
             'image': self.image,
             'active': self.active,
+            'allow': self.allow,
             'organizer_id': self.organizer_id,
-            'participants': [{
-                '_id': participant._id,
-                'firstname': participant.firstname,
-                'lastname': participant.lastname,
-                'email': participant.email,
-                'contacts': participant.contacts,
-                'photo': participant.photo} for participant in self.participants],
+            'participants': users_schema.dump(self.participants),
             'created_at': json_dump_(self.created_at),
             'updated_at': json_dump_(self.updated_at)
         }
 
     @classmethod
-    def find_by_name(cls, name: str, active=True):
+    def find_by_name(cls, name: str, active=True, allow=True):
         """ Find a event by his name in the database. """
-        return cls.query.filter_by(name=name).filter_by(active=active).first()
+        return (
+            cls.query.filter_by(name=name)
+            .filter_by(active=active)
+            .filter_by(allow=allow).first()
+        )
 
     @classmethod
-    def find_by_id(cls, _id: int, active=True):
+    def find_by_id(cls, _id: int, active=True, allow=True):
         """ Find a event by his ID in the database. """
-        return cls.query.filter_by(_id=_id).filter_by(active=active).first()
+        return (
+            cls.query.filter_by(_id=_id)
+            .filter_by(active=active)
+            .filter_by(allow=allow).first()
+        )
 
     @classmethod
     def find_without_active(cls, _id: int):
@@ -102,9 +105,13 @@ class EventModel(db.Model):
         return cls.query.filter_by(_id=_id).first()
 
     @classmethod
-    def find_all(cls, active=True):
+    def find_all(cls, active=True, allow=True):
         """ Find all events in the database. """
-        return cls.query.filter_by(active=active).all()
+        return cls.query.filter_by(active=active).filter_by(allow=True).all()
+
+    @classmethod
+    def find_allow(cls, allow=True):
+        return cls.query.filter_by(allow=allow).all()
 
     def save(self):
         """ Save new event into database. """

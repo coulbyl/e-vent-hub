@@ -25,8 +25,8 @@ class OrganizerRegister(Resource):
         # Store organizer and generate access_token
         organizer = OrganizerModel(**data)
         organizer.save()
-        access_token = create_access_token(identity=organizer._id, fresh=True)
-        refresh_token = create_refresh_token(identity=organizer._id)
+        access_token = create_access_token(identity=organizer._uuid, fresh=True)
+        refresh_token = create_refresh_token(identity=organizer._uuid)
 
         return {
             'organizer': organizer.json(),
@@ -37,7 +37,7 @@ class OrganizerRegister(Resource):
 
 class Organizer(Resource):
     @classmethod
-    @jwt_required()
+    # @jwt_required()
     def get(cls, _id: int):
         """ /organizer/<_id:int> - Get a organizer."""
         organizer = OrganizerModel.find_by_id(_id=_id)
@@ -112,8 +112,8 @@ class OrganizerLogin(Resource):
         organizer = OrganizerModel.find_by_email(email=data.email)
 
         if organizer and check_password_hash(organizer.password, data.password):
-            access_token = create_access_token(identity=organizer._id, fresh=True)
-            refresh_token = create_refresh_token(identity=organizer._id)
+            access_token = create_access_token(identity=organizer._uuid, fresh=True)
+            refresh_token = create_refresh_token(identity=organizer._uuid)
 
             return {
                 "organizer": organizer.json(),

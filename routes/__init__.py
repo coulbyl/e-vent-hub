@@ -10,11 +10,11 @@ from app.resources.organizer import (
 
 from app.resources.event import (
     Event, EventStore, EventPublishedList, EventUnpublishedList, EventPublication,
-    EventParticipant
+    EventParticipant, EventAuthorization, EventUnauthorizedList
 )
 
 from app.resources.admin import (
-    Admin, AdminRegister, AdminList, AdminLogin, AdminPasswordReset
+    Admin, AdminRegister, AdminList, AdminLogin, AdminPasswordReset, AdminRole
 )
 
 ROUTES = [
@@ -45,6 +45,8 @@ ROUTES = [
     {'resource': EventPublishedList, 'endpoint': '/events'},
     {'resource': EventPublication, 'endpoint': '/event/publication/<int:_id>'},
     {'resource': EventUnpublishedList, 'endpoint': '/events/unpublished'},
+    {'resource': EventAuthorization, 'endpoint': '/event/authorization/<int:_id>'},
+    {'resource': EventUnauthorizedList, 'endpoint': '/events/unauthorized'},
     {
         'resource': EventParticipant,
         'endpoint': '/event/participant/<int:event_id>/<int:user_id>'
@@ -56,6 +58,7 @@ ROUTES = [
     {'resource': AdminList, 'endpoint': '/admins'},
     {'resource': AdminLogin, 'endpoint': '/admin/login'},
     {'resource': AdminPasswordReset, 'endpoint': '/admin/password-reset/<int:_id>'},
+    {'resource': AdminRole, 'endpoint': '/admin/role/<int:_id>'},
 
     # Global
     {'resource': Logout, 'endpoint': '/logout'},

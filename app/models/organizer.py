@@ -1,20 +1,21 @@
 from db import db
 from datetime import datetime
 from werkzeug.security import generate_password_hash
-from utils import json_dump_
+from utils import json_dump_, generate_uuid
 
 
 class OrganizerModel(db.Model):
     __tablename__ = 'organizers'
 
     _id = db.Column(db.Integer, primary_key=True)
+    _uuid = db.Column(db.String(11), unique=True, default=f"or_{generate_uuid()}")
     name = db.Column(db.String(80), unique=True, nullable=False)
     contacts = db.Column(db.String(80), nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
     password = db.Column(db.String(120), nullable=False)
     photo = db.Column(db.String(120))
     active = db.Column(db.Boolean, default=True, nullable=False)
-    events = db.relationship('EventModel', lazy=True, back_populates="organizer")
+    events = db.relationship('EventModel', lazy=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime)
 
@@ -45,8 +46,11 @@ class OrganizerModel(db.Model):
 
     @classmethod
     def find_by_id(cls, _id: int, active=True):
-        """ Find a organizer by his ID in the database. """
         return cls.query.filter_by(_id=_id).filter_by(active=active).first()
+
+    @classmethod
+    def find_by_uuid(cls, _uuid: int, active=True):
+        return cls.query.filter_by(_uuid=_uuid).filter_by(active=active).first()
 
     @classmethod
     def find_all(cls, active=True):

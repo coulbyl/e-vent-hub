@@ -18,3 +18,6 @@ put_parser.add_argument('active', type=bool, required=True, help=_help)
 
 active_parser = reqparse.RequestParser()
 active_parser.add_argument('active', type=bool, required=True, help=_help)
+
+allow_parser = reqparse.RequestParser()
+allow_parser.add_argument('allow', type=bool, required=True, help=_help)

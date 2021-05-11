@@ -20,3 +20,6 @@ reset_parser.add_argument('confirm_password', type=str, required=True, help=_hel
 login_parser = reqparse.RequestParser()
 login_parser.add_argument('email', type=str, required=True, help=_help)
 login_parser.add_argument('password', type=str, required=True, help=_help)
+
+role_parser = reqparse.RequestParser()
+role_parser.add_argument('role', type=str, required=True, help=_help)
