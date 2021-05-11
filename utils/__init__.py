@@ -1,3 +1,4 @@
+from uuid import uuid4
 import json
 from datetime import datetime
 
@@ -9,3 +10,7 @@ def json_serializer(datetime_object):
 
 def json_dump_(datetime_object):
     return json.dumps(datetime_object, default=json_serializer).replace('"', '')
+
+
+def generate_uuid():
+    return str(uuid4())[:8]
