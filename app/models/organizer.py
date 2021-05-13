@@ -57,6 +57,11 @@ class OrganizerModel(db.Model):
         """ Find all organizerd in the database. """
         return cls.query.filter_by(active=active).all()
 
+    @classmethod
+    def find_without_active(cls, _id: int):
+        """ Find an organizer by its ID without relying on the active property in the database."""
+        return cls.query.filter_by(_id=_id).first()
+
     def save(self):
         """ Save new organizer into database. """
         db.session.add(self)

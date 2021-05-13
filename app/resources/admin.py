@@ -6,19 +6,14 @@ from flask_jwt_extended import (
 )
 
 from app.models.admin import AdminModel
-from app.models.user import UserModel
-from app.models.organizer import OrganizerModel
 from app.parsers.admin import post_parser, put_parser, reset_parser, login_parser, role_parser
-from app.parsers.event import active_parser
 from werkzeug.security import check_password_hash, safe_str_cmp, generate_password_hash
 from datetime import datetime
 
-# Error message
-ADMIN_DOES_NOT_EXIST = "Désolé, l'utilisateur ({}) n'existe pas."
-ADMIN_ALREADY_EXISTS = "Désolé, l'utilisateur ({}) existe déjà."
-ADMIN_SUCCESSFULLY_CREATED = "Votre compte a été créé avec succès."
-ADMIN_SUCCESSFULLY_UPDATED = "Informations mises à jour avec succès."
-ADMIN_SUCCESSFULLY_DELETED = "Votre compte a été supprimé avec succès."
+# Message
+from app.resources import (
+    ACCOUNT_DOES_NOT_EXIST, ACCOUNT_ALREADY_EXISTS, ACCOUNT_SUCCESSFULLY_CREATED,
+    ACCOUNT_SUCCESSFULLY_UPDATED, INVALIDCREDENTIALS, SERVER_ERROR)
 
 
 def superuser_required(func):
@@ -53,17 +48,17 @@ class AdminRegister(Resource):
     @superuser_required
     def post(cls):
         data = post_parser.parse_args(strict=True)
-
         if AdminModel.find_by_email(email=data.email):
-            abort(400, message=ADMIN_ALREADY_EXISTS.format(data.email))
-
+            abort(400, message=ACCOUNT_ALREADY_EXISTS.format(data.email))
         admin = AdminModel(**data)
-        admin.save()
-
-        return {
-            'admin': admin.json(),
-            'message': ADMIN_SUCCESSFULLY_CREATED
-        }, 201
+        try:
+            admin.save()
+            return {
+                'user': admin.json(),
+                'message': ACCOUNT_SUCCESSFULLY_CREATED
+            }, 201
+        except Exception:
+            abort(500, message=SERVER_ERROR)
 
 
 class Admin(Resource):
@@ -74,26 +69,27 @@ class Admin(Resource):
         """ /admin/<_id:int> - Get a admin."""
         admin = AdminModel.find_by_id(_id=_id)
         if not admin:
-            abort(404, message=ADMIN_DOES_NOT_EXIST.format(_id))
+            abort(404, message=ACCOUNT_DOES_NOT_EXIST)
         return admin.json()
 
     @classmethod
     @jwt_required()
+    @admin_required
     def put(cls, _id: int):
-        """ /admin/<_id:int> - Update a admin."""
+        """ /admin/<id> - Update a admin."""
         admin_found = AdminModel.find_by_id(_id=_id)
         if admin_found:
             data = put_parser.parse_args(strict=True)
-
             admin_found.username = data.username
             admin_found.email = data.email
             admin_found.contacts = data.contacts
             admin_found.updated_at = datetime.utcnow()
-            admin_found.save()
-
-            return {'messsage': ADMIN_SUCCESSFULLY_UPDATED}
-
-        abort(400, message=ADMIN_DOES_NOT_EXIST.format(_id))
+            try:
+                admin_found.save()
+                return {'messsage': ACCOUNT_SUCCESSFULLY_UPDATED}
+            except Exception:
+                abort(500, message=SERVER_ERROR)
+        abort(400, message=ACCOUNT_DOES_NOT_EXIST)
 
     @classmethod
     @jwt_required()
@@ -116,9 +112,10 @@ class AdminList(Resource):
 
 
 class AdminPasswordReset(Resource):
-    """ /admin/reset-password/<_id> - Reset admin password"""
+    """ /admin/password-reset/<_id> - Reset admin password"""
     @classmethod
     @jwt_required()
+    @admin_required
     def put(cls, _id: int):
         admin_found = AdminModel.find_by_id(_id=_id)
         if admin_found:
@@ -130,7 +127,7 @@ class AdminPasswordReset(Resource):
                 admin_found.save()
                 return {'messsage': 'Mot de passe réinitialisé avec succès.'}
             abort(400, message="Un problème est survenu. Vérifiez votre mot de passe.")
-        abort(400, message=ADMIN_DOES_NOT_EXIST.format(_id))
+        abort(400, message=ACCOUNT_DOES_NOT_EXIST)
 
 
 class AdminLogin(Resource):
@@ -145,11 +142,11 @@ class AdminLogin(Resource):
             refresh_token = create_refresh_token(identity=admin._uuid)
 
             return {
-                "admin": admin.json(),
+                "user": admin.json(),
                 "token": {"access_token": access_token, "refresh_token": refresh_token}
             }
 
-        abort(401, message="Invalid credentials.")
+        abort(401, message=INVALIDCREDENTIALS)
 
 
 class AdminRole(Resource):
@@ -165,30 +162,3 @@ class AdminRole(Resource):
             admin_found.save()
             return {'messsage': ADMIN_SUCCESSFULLY_UPDATED}
         abort(400, message=ADMIN_DOES_NOT_EXIST.format(_id))
-
-
-class UserActivation(Resource):
-    """ /user/activation/<_uuid> - Activate or disable user"""""
-    @classmethod
-    @jwt_required()
-    def put(cls, _uuid: str):
-        args = active_parser.parse_args(strict=True)
-        active: bool = args.active
-
-        user = UserModel.find_by_uuid(_uuid, False if active else True)
-        organizer = OrganizerModel.find_by_uuid(_uuid, False if active else True)
-
-        global user_found
-
-        if user:
-            user_found = user
-        elif organizer:
-            user_found = organizer
-
-        if user_found:
-            user_found.active = active
-            user_found.updated_at = datetime.utcnow()
-            user_found.save()
-            return {'messsage': ADMIN_SUCCESSFULLY_UPDATED}
-
-        abort(400, message=ADMIN_DOES_NOT_EXIST.format(_uuid))

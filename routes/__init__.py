@@ -1,11 +1,11 @@
 from app.resources.user import (
     User, UserRegister, UserList, UserPasswordReset,
-    UserLogin, Logout, TokenRefresh, UserFavouriteEvent
+    UserLogin, Logout, TokenRefresh, UserFavouriteEvent, UserActivation
 )
 
 from app.resources.organizer import (
-    Organizer, OrganizerRegister, OrganizerList, OrganizerPasswordReset,
-    OrganizerLogin
+    Organizer, OrganizerActivation, OrganizerRegister, OrganizerList,
+    OrganizerPasswordReset, OrganizerLogin
 )
 
 from app.resources.event import (
@@ -15,16 +15,16 @@ from app.resources.event import (
 
 from app.resources.admin import (
     Admin, AdminRegister, AdminList, AdminLogin,
-    AdminPasswordReset, AdminRole, UserActivation
+    AdminPasswordReset, AdminRole
 )
 
 ROUTES = [
     # User
     {'resource': User, 'endpoint': '/user/<int:_id>'},
-    {'resource': UserRegister, 'endpoint': '/register'},
+    {'resource': UserRegister, 'endpoint': '/user/register'},
     {'resource': UserList, 'endpoint': '/users'},
-    {'resource': UserLogin, 'endpoint': '/login'},
-    {'resource': UserPasswordReset, 'endpoint': '/password-reset/<int:_id>'},
+    {'resource': UserLogin, 'endpoint': '/user/login'},
+    {'resource': UserPasswordReset, 'endpoint': '/user/password-reset/<int:_id>'},
     {
         'resource': UserFavouriteEvent,
         'endpoint': '/user/favourite-event/<int:user_id>/<int:event_id>'
@@ -60,7 +60,8 @@ ROUTES = [
     {'resource': AdminLogin, 'endpoint': '/admin/login'},
     {'resource': AdminPasswordReset, 'endpoint': '/admin/password-reset/<int:_id>'},
     {'resource': AdminRole, 'endpoint': '/admin/role/<int:_id>'},
-    {'resource': UserActivation, 'endpoint': '/user/activation/<string:_uuid>'},
+    {'resource': UserActivation, 'endpoint': '/public/activation/<int:_id>'},
+    {'resource': OrganizerActivation, 'endpoint': '/organizer/activation/<int:_id>'},
 
     # Global
     {'resource': Logout, 'endpoint': '/logout'},

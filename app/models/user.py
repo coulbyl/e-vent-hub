@@ -70,6 +70,11 @@ class UserModel(db.Model):
         return cls.query.filter_by(_id=_id).filter_by(active=active).first()
 
     @classmethod
+    def find_without_active(cls, _id: int):
+        """ Find a user by its ID without relying on the active property in the database."""
+        return cls.query.filter_by(_id=_id).first()
+
+    @classmethod
     def find_by_uuid(cls, _uuid: int, active=True):
         return cls.query.filter_by(_uuid=_uuid).filter_by(active=active).first()
 

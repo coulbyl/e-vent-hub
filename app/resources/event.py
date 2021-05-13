@@ -7,15 +7,6 @@ from flask_jwt_extended import jwt_required
 from .admin import admin_required
 
 
-# Error message
-EVENT_DOES_NOT_EXIST = "Désolé, l'évènement ({}) n'existe pas."
-PARTICIPANT_DOES_NOT_EXIST = "Désolé, l'utilisateur ({}) n'existe pas."
-EVENT_ALREADY_EXISTS = "Désolé, l'évènement ({}) existe déjà."
-EVENT_SUCCESSFULLY_CREATED = "Votre évènement a été créé avec succès."
-EVENT_SUCCESSFULLY_UPDATED = "Informations mises à jour avec succès."
-EVENT_SUCCESSFULLY_DELETED = "Votre évènement a été supprimé avec succès."
-
-
 class EventStore(Resource):
     """ /event/store - Store event"""
     @classmethod
