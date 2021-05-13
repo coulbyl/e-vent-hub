@@ -1,12 +1,15 @@
 import functools
 from flask_restful import Resource, abort
 from flask_jwt_extended import (
-    get_jwt, jwt_required, create_access_token, create_refresh_token,
+    jwt_required, create_access_token, create_refresh_token,
     get_jwt_identity
 )
 
 from app.models.admin import AdminModel
+from app.models.user import UserModel
+from app.models.organizer import OrganizerModel
 from app.parsers.admin import post_parser, put_parser, reset_parser, login_parser, role_parser
+from app.parsers.event import active_parser
 from werkzeug.security import check_password_hash, safe_str_cmp, generate_password_hash
 from datetime import datetime
 
@@ -18,14 +21,28 @@ ADMIN_SUCCESSFULLY_UPDATED = "Informations mises à jour avec succès."
 ADMIN_SUCCESSFULLY_DELETED = "Votre compte a été supprimé avec succès."
 
 
+def superuser_required(func):
+    @functools.wraps(func)
+    def wrapper(*args, **kwargs):
+        claims = get_jwt_identity()
+        if not claims['superuser']:
+            abort(401, message="Superuser privilege required.")
+
+        return func(*args, **kwargs)
+    return wrapper
+
+
 def admin_required(func):
     @functools.wraps(func)
     def wrapper(*args, **kwargs):
         claims = get_jwt_identity()
-        if claims['superuser'] == True and claims['admin'] == True:
-            return func(*args, **kwargs)
+        is_admin = claims['admin'] == True
+        is_superuser = claims['superuser'] == True
+        print(is_superuser, is_admin)
+        if not is_superuser and not is_admin:
+            abort(401, message="Admin privilege required.")
 
-        abort(401, message='Admin privilege required.')
+        return func(*args, **kwargs)
     return wrapper
 
 
@@ -33,25 +50,20 @@ class AdminRegister(Resource):
     """ /admin/register - Register a new admin."""
     @classmethod
     @jwt_required()
+    @superuser_required
     def post(cls):
-        claims = get_jwt_identity()
-        if claims['superuser'] == True and claims['admin'] == False:
-            data = post_parser.parse_args(strict=True)
+        data = post_parser.parse_args(strict=True)
 
-            if AdminModel.find_by_email(email=data.email):
-                abort(400, message=ADMIN_ALREADY_EXISTS.format(data.email))
+        if AdminModel.find_by_email(email=data.email):
+            abort(400, message=ADMIN_ALREADY_EXISTS.format(data.email))
 
-            admin = AdminModel(**data)
-            admin.save()
-            access_token = create_access_token(identity=admin._uuid, fresh=True)
-            refresh_token = create_refresh_token(identity=admin._uuid)
+        admin = AdminModel(**data)
+        admin.save()
 
-            return {
-                'admin': admin.json(),
-                'token': {'access_token': access_token, 'refresh_token': refresh_token},
-                'message': ADMIN_SUCCESSFULLY_CREATED
-            }, 201
-        abort(401, message='Superuser privilege rerquired.')
+        return {
+            'admin': admin.json(),
+            'message': ADMIN_SUCCESSFULLY_CREATED
+        }, 201
 
 
 class Admin(Resource):
@@ -60,13 +72,10 @@ class Admin(Resource):
     @admin_required
     def get(cls, _id: int):
         """ /admin/<_id:int> - Get a admin."""
-        #claims = get_jwt_identity()
-        # if claims['superuser'] == True and claims['admin'] == True:
         admin = AdminModel.find_by_id(_id=_id)
         if not admin:
             abort(404, message=ADMIN_DOES_NOT_EXIST.format(_id))
         return admin.json()
-        #abort(401, message='Admin privilege required.')
 
     @classmethod
     @jwt_required()
@@ -103,10 +112,6 @@ class AdminList(Resource):
     @classmethod
     @jwt_required()
     def get(cls):
-        claims = get_jwt_identity()
-        if not claims['is_superuser']:
-            return {'message': 'Superuser privilege required.'}, 401
-
         return {'admins': [admin.json() for admin in AdminModel.find_all()]}
 
 
@@ -151,11 +156,7 @@ class AdminRole(Resource):
     @classmethod
     @jwt_required()
     def put(cls, _id: int):
-        """ /admin/role/<_id:int> - Update a admin."""
-        claims = get_jwt_identity()
-        if not claims['is_superuser']:
-            return {'message': 'Superuser privilege required.'}, 401
-
+        """ /admin/role/<_id:int> - Update a role of admin."""
         admin_found = AdminModel.find_by_id(_id=_id)
         if admin_found and admin_found.role == 'admin':
             data = role_parser.parse_args(strict=True)
@@ -164,3 +165,30 @@ class AdminRole(Resource):
             admin_found.save()
             return {'messsage': ADMIN_SUCCESSFULLY_UPDATED}
         abort(400, message=ADMIN_DOES_NOT_EXIST.format(_id))
+
+
+class UserActivation(Resource):
+    """ /user/activation/<_uuid> - Activate or disable user"""""
+    @classmethod
+    @jwt_required()
+    def put(cls, _uuid: str):
+        args = active_parser.parse_args(strict=True)
+        active: bool = args.active
+
+        user = UserModel.find_by_uuid(_uuid, False if active else True)
+        organizer = OrganizerModel.find_by_uuid(_uuid, False if active else True)
+
+        global user_found
+
+        if user:
+            user_found = user
+        elif organizer:
+            user_found = organizer
+
+        if user_found:
+            user_found.active = active
+            user_found.updated_at = datetime.utcnow()
+            user_found.save()
+            return {'messsage': ADMIN_SUCCESSFULLY_UPDATED}
+
+        abort(400, message=ADMIN_DOES_NOT_EXIST.format(_uuid))

@@ -3,6 +3,9 @@ from app.models.event import EventModel
 from app.models.user import UserModel
 from app.parsers.event import post_parser, put_parser, active_parser, allow_parser
 from datetime import datetime
+from flask_jwt_extended import jwt_required
+from .admin import admin_required
+
 
 # Error message
 EVENT_DOES_NOT_EXIST = "Désolé, l'évènement ({}) n'existe pas."
@@ -122,12 +125,10 @@ class EventUnpublishedList(Resource):
 
 class EventAuthorization(Resource):
     @classmethod
+    @jwt_required()
+    @admin_required
     def put(cls, _id: int):
         """ /event/authorization/<int:_id>"""
-        claims = get_jwt_identity()
-        if not claims['is_superuser']:
-            return {'message': 'Admin privilege required.'}, 401
-
         event_found = EventModel.find_without_active(_id=_id)
         if event_found:
             data = allow_parser.parse_args(strict=True)

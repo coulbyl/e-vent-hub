@@ -47,7 +47,7 @@ def add_claims_to_jwt(identity):
     if admin and admin.role == 'superuser':
         return {'superuser': True, 'admin': False, 'organizer': False, 'client': False}
     elif admin and admin.role == 'admin':
-        return {'superuser': True, 'admin': True, 'organizer': True, 'client': False}
+        return {'superuser': False, 'admin': True, 'organizer': False, 'client': False}
     elif organizer:
         return {'superuser': False, 'admin': False, 'organizer': True, 'client': False}
     elif client:

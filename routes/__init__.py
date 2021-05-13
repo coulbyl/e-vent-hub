@@ -14,7 +14,8 @@ from app.resources.event import (
 )
 
 from app.resources.admin import (
-    Admin, AdminRegister, AdminList, AdminLogin, AdminPasswordReset, AdminRole
+    Admin, AdminRegister, AdminList, AdminLogin,
+    AdminPasswordReset, AdminRole, UserActivation
 )
 
 ROUTES = [
@@ -59,6 +60,7 @@ ROUTES = [
     {'resource': AdminLogin, 'endpoint': '/admin/login'},
     {'resource': AdminPasswordReset, 'endpoint': '/admin/password-reset/<int:_id>'},
     {'resource': AdminRole, 'endpoint': '/admin/role/<int:_id>'},
+    {'resource': UserActivation, 'endpoint': '/user/activation/<string:_uuid>'},
 
     # Global
     {'resource': Logout, 'endpoint': '/logout'},
