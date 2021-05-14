@@ -23,8 +23,8 @@ app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get(
     'HEROKU_POSTGRESQL_IVORY_URL').replace('postgres://', 'postgresql://')
 # os.getenv('DB_URI')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.secret_key = os.getenv('FLASK_KEY')
-app.config["JWT_SECRET_KEY"] = os.getenv('JWT_SECRET_KEY')
+app.secret_key = os.environ.get('FLASK_KEY')
+app.config["JWT_SECRET_KEY"] = os.environ.get('JWT_SECRET_KEY')
 app.config["JWT_ACCESS_TOKEN_EXPIRES"] = ACCESS_EXPIRES
 
 api = Api(app)
