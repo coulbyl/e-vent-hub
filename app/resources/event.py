@@ -4,100 +4,131 @@ from app.models.user import UserModel
 from app.parsers.event import post_parser, put_parser, active_parser, allow_parser
 from datetime import datetime
 from flask_jwt_extended import jwt_required
-from .admin import admin_required
+from app.resources.admin import admin_required
+from app.resources.organizer import organizer_required
+from app.resources.user import client_required
+
+# Messages
+from app.resources import ACCOUNT_DOES_NOT_EXIST, EVENT_DOES_NOT_EXIST, EVENT_SUCCESSFULLY_DELETED, EVENT_SUCCESSFULLY_UPDATED, SERVER_ERROR
 
 
 class EventStore(Resource):
     """ /event/store - Store event"""
     @classmethod
+    @jwt_required()
+    @organizer_required
     def post(cls):
         data = post_parser.parse_args(strict=True)
         event = EventModel(**data)
-        event.save()
-        return event.json(), 201
+        try:
+            event.save()
+            return event.json(), 201
+        except Exception:
+            abort(500, SERVER_ERROR)
 
 
 class EventParticipant(Resource):
-    """ /event/participant/<event_id>/<user_id> - """
+    """ /event/participant/<event_id>/<user_id>"""
     @classmethod
+    @jwt_required()
+    @client_required
     def post(cls, event_id: int, user_id: int):
-        event_found = EventModel.find_by_id(_id=event_id)
-        if event_found:
+        event = EventModel.find_by_id(_id=event_id)
+        if event:
             participant = UserModel.find_by_id(_id=user_id)
             if participant:
-                event_found.add_participant(participant)
-                return {"message": "Inscription terminée avec succès."}, 201
-            abort(404, message=PARTICIPANT_DOES_NOT_EXIST.format(user_id))
-        abort(404, message=EVENT_DOES_NOT_EXIST.format(event_id))
+                try:
+                    event.add_participant(participant)
+                    return {"message": "Inscription terminée avec succès."}, 201
+                except Exception:
+                    abort(500, SERVER_ERROR)
+            abort(404, message=ACCOUNT_DOES_NOT_EXIST)
+        abort(404, message=EVENT_DOES_NOT_EXIST)
 
     @classmethod
+    @jwt_required()
+    @client_required
     def delete(cls, event_id: int, user_id: int):
-        event_found = EventModel.find_by_id(_id=event_id)
-        if event_found:
+        event = EventModel.find_by_id(_id=event_id)
+        if event:
             participant = UserModel.find_by_id(_id=user_id)
             if participant:
-                event_found.remove_participant(participant)
-                return {"message": "Inscription retirée avec succès."}, 201
-            abort(404, message=PARTICIPANT_DOES_NOT_EXIST.format(user_id))
-        abort(404, message=EVENT_DOES_NOT_EXIST.format(event_id))
+                try:
+                    event.remove_participant(participant)
+                    return {"message": "Inscription retirée avec succès."}, 201
+                except Exception:
+                    abort(500, message=SERVER_ERROR)
+            abort(404, message=ACCOUNT_DOES_NOT_EXIST)
+        abort(404, message=EVENT_DOES_NOT_EXIST)
 
 
 class Event(Resource):
     @classmethod
+    @jwt_required()
     def get(cls, _id: int):
-        """ /event/<_id:int> - Get event."""
+        """ /event/<id> - Get event."""
         event = EventModel.find_by_id(_id=_id)
-
         if not event:
-            abort(404, message=EVENT_DOES_NOT_EXIST.format(_id))
+            abort(404, message=EVENT_DOES_NOT_EXIST)
         return event.json()
 
     @classmethod
+    @jwt_required()
+    @organizer_required
     def put(cls, _id: int):
-        """ /event/<_id:int> - Update event."""
-        event_found = EventModel.find_without_active(_id=_id)
-        if event_found:
+        """ /event/<id> - Update event."""
+        event = EventModel.find_without_active(_id=_id)
+        if event:
             data = put_parser.parse_args(strict=True)
-
-            event_found.name = data.name
-            event_found.location = data.location
-            event_found.description = data.description
-            event_found.price = data.price
-            event_found.available_places = data.available_places
-            event_found.start_at = data.start_at
-            event_found.end_at = data.end_at
-            event_found.image = data.image
-            event_found.active = data.active
-            event_found.updated_at = datetime.utcnow()
-            event_found.save()
-
-            return {'messsage': EVENT_SUCCESSFULLY_UPDATED}
-
-        abort(400, message=EVENT_DOES_NOT_EXIST.format(_id))
+            event.name = data.name
+            event.location = data.location
+            event.description = data.description
+            event.price = data.price
+            event.available_places = data.available_places
+            event.start_at = data.start_at
+            event.end_at = data.end_at
+            event.image = data.image
+            event.active = data.active
+            event.updated_at = datetime.utcnow()
+            try:
+                event.save()
+                return {'messsage': EVENT_SUCCESSFULLY_UPDATED}
+            except Exception:
+                abort(500, message=SERVER_ERROR)
+        abort(400, message=EVENT_DOES_NOT_EXIST)
 
     @classmethod
+    @jwt_required()
+    @organizer_required
     def delete(cls, _id: int):
-        """ /event/<_id:int> - Delete event."""
-        event_found = EventModel.find_without_active(_id=_id)
-        if event_found:
-            event_found.delete()
-            return {'message': EVENT_SUCCESSFULLY_DELETED}
-
-        abort(400, message=EVENT_DOES_NOT_EXIST.format(_id))
+        """ /event/<id> - Delete event."""
+        event = EventModel.find_without_active(_id=_id)
+        if event:
+            try:
+                event.delete()
+                return {'message': EVENT_SUCCESSFULLY_DELETED}
+            except Exception:
+                abort(500, message=SERVER_ERROR)
+        abort(400, message=EVENT_DOES_NOT_EXIST)
 
 
 class EventPublication(Resource):
     @classmethod
+    @jwt_required()
+    @organizer_required
     def put(cls, _id: int):
-        """ /event/publication/<int:_id> - published or unpublished event."""
-        event_found = EventModel.find_without_active(_id=_id)
-        if event_found:
+        """ /event/publication/<id> - published or unpublished event."""
+        event = EventModel.find_without_active(_id=_id)
+        if event:
             data = active_parser.parse_args(strict=True)
-            event_found.active = data.active
-            event_found.updated_at = datetime.utcnow()
-            event_found.save()
-            return {'messsage': EVENT_SUCCESSFULLY_UPDATED}
-        abort(400, message=EVENT_DOES_NOT_EXIST.format(_id))
+            event.active = data.active
+            event.updated_at = datetime.utcnow()
+            try:
+                event.save()
+                return {'messsage': EVENT_SUCCESSFULLY_UPDATED}
+            except Exception:
+                abort(500, message=SERVER_ERROR)
+        abort(400, message=EVENT_DOES_NOT_EXIST)
 
 
 class EventPublishedList(Resource):
@@ -119,15 +150,18 @@ class EventAuthorization(Resource):
     @jwt_required()
     @admin_required
     def put(cls, _id: int):
-        """ /event/authorization/<int:_id>"""
+        """ /event/authorization/<id>"""
         event_found = EventModel.find_without_active(_id=_id)
         if event_found:
             data = allow_parser.parse_args(strict=True)
             event_found.allow = data.allow
             event_found.updated_at = datetime.utcnow()
-            event_found.save()
-            return {'messsage': EVENT_SUCCESSFULLY_UPDATED}
-        abort(400, message=EVENT_DOES_NOT_EXIST.format(_id))
+            try:
+                event_found.save()
+                return {'messsage': EVENT_SUCCESSFULLY_UPDATED}
+            except Exception:
+                abort(500, message=SERVER_ERROR)
+        abort(400, message=EVENT_DOES_NOT_EXIST)
 
 
 class EventUnauthorizedList(Resource):

@@ -1,6 +1,9 @@
 from datetime import datetime
 import functools
-from flask_jwt_extended import jwt_required, create_access_token, create_refresh_token, get_jwt_identity
+from flask_jwt_extended import (
+    jwt_required, create_access_token,
+    create_refresh_token, get_jwt_identity
+)
 from werkzeug.security import check_password_hash, generate_password_hash, safe_str_cmp
 from flask_restful import Resource, abort
 
@@ -12,7 +15,8 @@ from .admin import admin_required
 # Message
 from app.resources import (
     ACCOUNT_DOES_NOT_EXIST, ACCOUNT_ALREADY_EXISTS, ACCOUNT_SUCCESSFULLY_CREATED,
-    ACCOUNT_SUCCESSFULLY_UPDATED, INVALIDCREDENTIALS, SERVER_ERROR)
+    ACCOUNT_SUCCESSFULLY_DELETED, ACCOUNT_SUCCESSFULLY_UPDATED, INVALIDCREDENTIALS,
+    SERVER_ERROR)
 
 
 def organizer_required(func):
@@ -81,20 +85,24 @@ class Organizer(Resource):
 
     @classmethod
     @jwt_required()
+    @organizer_required
     def delete(cls, _id: int):
-        """ /organizer/<_id:int> - Delete a organizer."""
-        organizer_found = OrganizerModel.find_by_id(_id=_id)
-        if organizer_found:
-            organizer_found.delete()
-            return {'message': ACCOUNT_SUCCESSFULLY_DELETED}
-
-        abort(400, message=ACCOUNT_DOES_NOT_EXIST.format(_id))
+        """ /organizer/<id> - Delete a organizer."""
+        organizer = OrganizerModel.find_by_id(_id=_id)
+        if organizer:
+            try:
+                organizer.delete()
+                return {'message': ACCOUNT_SUCCESSFULLY_DELETED}
+            except Exception:
+                abort(500, message=SERVER_ERROR)
+        abort(400, message=ACCOUNT_DOES_NOT_EXIST)
 
 
 class OrganizerList(Resource):
     """ /organizers - Get all organizers - (superorganizer)"""
     @classmethod
-    @jwt_required()  # admin claims
+    @jwt_required()
+    @admin_required
     def get(cls):
         return {'organizers': [organizer.json() for organizer in OrganizerModel.find_all()]}
 
@@ -143,7 +151,6 @@ class OrganizerActivation(Resource):
     def put(cls, _id: int):
         args = active_parser.parse_args(strict=True)
         organizer = OrganizerModel.find_without_active(_id)
-
         if organizer:
             organizer.active = args.active
             organizer.updated_at = datetime.utcnow()
@@ -151,5 +158,5 @@ class OrganizerActivation(Resource):
                 organizer.save()
                 return {'messsage': ACCOUNT_SUCCESSFULLY_UPDATED}
             except Exception:
-                abort(500, message='Un problème est survenu. Veuillez réessayer.')
-        abort(400, message=ACCOUNT_DOES_NOT_EXIST.format(_id))
+                abort(500, message=SERVER_ERROR)
+        abort(400, message=ACCOUNT_DOES_NOT_EXIST)

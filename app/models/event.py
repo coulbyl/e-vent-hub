@@ -29,17 +29,18 @@ class EventModel(db.Model):
     image = db.Column(db.String(120))
     active = db.Column(db.Boolean, default=False, nullable=False)
     allow = db.Column(db.Boolean, default=True, nullable=False)
-
     organizer_id = db.Column(
         db.Integer,
         db.ForeignKey('organizers._id'),
         nullable=False
     )
     # organizer = db.relationship('OrganizerModel', back_populates="events")
-
     participants = db.relationship(
-        'UserModel', secondary=participant_events, lazy='subquery')
-
+        'UserModel',
+        secondary=participant_events,
+        cascade="all,delete",
+        lazy='subquery'
+    )
     created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
     updated_at = db.Column(db.DateTime)
 

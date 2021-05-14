@@ -60,7 +60,7 @@ ROUTES = [
     {'resource': AdminLogin, 'endpoint': '/admin/login'},
     {'resource': AdminPasswordReset, 'endpoint': '/admin/password-reset/<int:_id>'},
     {'resource': AdminRole, 'endpoint': '/admin/role/<int:_id>'},
-    {'resource': UserActivation, 'endpoint': '/public/activation/<int:_id>'},
+    {'resource': UserActivation, 'endpoint': '/user/activation/<int:_id>'},
     {'resource': OrganizerActivation, 'endpoint': '/organizer/activation/<int:_id>'},
 
     # Global

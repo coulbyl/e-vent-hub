@@ -13,7 +13,8 @@ from datetime import datetime
 # Message
 from app.resources import (
     ACCOUNT_DOES_NOT_EXIST, ACCOUNT_ALREADY_EXISTS, ACCOUNT_SUCCESSFULLY_CREATED,
-    ACCOUNT_SUCCESSFULLY_UPDATED, INVALIDCREDENTIALS, SERVER_ERROR)
+    ACCOUNT_SUCCESSFULLY_DELETED, ACCOUNT_SUCCESSFULLY_UPDATED, INVALIDCREDENTIALS,
+    SERVER_ERROR)
 
 
 def superuser_required(func):
@@ -93,20 +94,24 @@ class Admin(Resource):
 
     @classmethod
     @jwt_required()
+    @admin_required
     def delete(cls, _id: int):
-        """ /admin/<_id:int> - Delete a admin."""
-        admin_found = AdminModel.find_by_id(_id=_id)
-        if admin_found and admin_found.role == 'admin':
-            admin_found.delete()
-            return {'message': ADMIN_SUCCESSFULLY_DELETED}
-
-        abort(400, message=ADMIN_DOES_NOT_EXIST.format(_id))
+        """ /admin/<id> - Delete a admin."""
+        admin = AdminModel.find_by_id(_id=_id)
+        if admin and admin.role == 'admin':
+            try:
+                admin.delete()
+                return {'message': ACCOUNT_SUCCESSFULLY_DELETED}
+            except Exception:
+                abort(500, message=SERVER_ERROR)
+        abort(400, message=ACCOUNT_DOES_NOT_EXIST)
 
 
 class AdminList(Resource):
     """ /admins - Get all admins - (superadmin)"""
     @classmethod
     @jwt_required()
+    @superuser_required
     def get(cls):
         return {'admins': [admin.json() for admin in AdminModel.find_all()]}
 
@@ -124,8 +129,11 @@ class AdminPasswordReset(Resource):
             if is_same and safe_str_cmp(data.new_password, data.confirm_password):
                 admin_found.password = generate_password_hash(data.new_password)
                 admin_found.updated_at = datetime.utcnow()
-                admin_found.save()
-                return {'messsage': 'Mot de passe réinitialisé avec succès.'}
+                try:
+                    admin_found.save()
+                    return {'messsage': 'Mot de passe réinitialisé avec succès.'}
+                except Exception:
+                    abort(500, message=SERVER_ERROR)
             abort(400, message="Un problème est survenu. Vérifiez votre mot de passe.")
         abort(400, message=ACCOUNT_DOES_NOT_EXIST)
 
@@ -152,13 +160,17 @@ class AdminLogin(Resource):
 class AdminRole(Resource):
     @classmethod
     @jwt_required()
+    @superuser_required
     def put(cls, _id: int):
-        """ /admin/role/<_id:int> - Update a role of admin."""
+        """ /admin/role/<id> - Update a role of admin."""
         admin_found = AdminModel.find_by_id(_id=_id)
         if admin_found and admin_found.role == 'admin':
             data = role_parser.parse_args(strict=True)
             admin_found.role = data.role
             admin_found.updated_at = datetime.utcnow()
-            admin_found.save()
-            return {'messsage': ADMIN_SUCCESSFULLY_UPDATED}
-        abort(400, message=ADMIN_DOES_NOT_EXIST.format(_id))
+            try:
+                admin_found.save()
+                return {'messsage': ACCOUNT_SUCCESSFULLY_UPDATED}
+            except Exception:
+                abort(500, message=SERVER_ERROR)
+        abort(400, message=ACCOUNT_DOES_NOT_EXIST)

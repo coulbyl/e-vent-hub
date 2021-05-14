@@ -17,8 +17,8 @@ from .admin import admin_required
 # Message
 from app.resources import (
     ACCOUNT_DOES_NOT_EXIST, ACCOUNT_ALREADY_EXISTS, ACCOUNT_SUCCESSFULLY_CREATED,
-    ACCOUNT_SUCCESSFULLY_DELETED, ACCOUNT_SUCCESSFULLY_UPDATED, INVALIDCREDENTIALS,
-    SERVER_ERROR)
+    ACCOUNT_SUCCESSFULLY_DELETED, ACCOUNT_SUCCESSFULLY_UPDATED, EVENT_DOES_NOT_EXIST,
+    INVALIDCREDENTIALS, SERVER_ERROR)
 
 
 def client_required(func):
@@ -59,27 +59,35 @@ class UserFavouriteEvent(Resource):
     """ /user/favourite-event/<int:user_id>/<int:event_id> - """
     @classmethod
     @jwt_required()
+    @client_required
     def post(cls, user_id: int, event_id: int):
-        user_found = UserModel.find_by_id(_id=user_id)
-        if user_found:
+        user = UserModel.find_by_id(_id=user_id)
+        if user:
             event = EventModel.find_by_id(_id=event_id)
             if event:
-                user_found.add_favourite(event)
-                return {"message": "Événement ajouté à votre liste de favoris."}, 201
-            abort(404, message=EVENT_DOES_NOT_EXIST.format(event_id))
-        abort(404, message=USER_DOES_NOT_EXIST.format(user_id))
+                try:
+                    user.add_favourite(event)
+                    return {"message": "Événement ajouté à votre liste de favoris."}, 201
+                except Exception:
+                    abort(500, message=SERVER_ERROR)
+            abort(404, message=EVENT_DOES_NOT_EXIST)
+        abort(404, message=ACCOUNT_DOES_NOT_EXIST)
 
     @classmethod
     @jwt_required()
+    @client_required
     def delete(cls,  user_id: int, event_id: int):
-        user_found = UserModel.find_by_id(_id=user_id)
-        if user_found:
+        user = UserModel.find_by_id(_id=user_id)
+        if user:
             event = EventModel.find_by_id(_id=event_id)
             if event:
-                user_found.remove_favourite(event)
-                return {"message": "Événement retiré à votre liste de favoris."}, 201
-            abort(404, message=EVENT_DOES_NOT_EXIST.format(event_id))
-        abort(404, message=USER_DOES_NOT_EXIST.format(user_id))
+                try:
+                    user.remove_favourite(event)
+                    return {"message": "Événement retiré à votre liste de favoris."}, 201
+                except Exception:
+                    abort(500, message=SERVER_ERROR)
+            abort(404, message=EVENT_DOES_NOT_EXIST)
+        abort(404, message=ACCOUNT_DOES_NOT_EXIST)
 
 
 class User(Resource):
@@ -115,14 +123,17 @@ class User(Resource):
 
     @classmethod
     @jwt_required()
+    @client_required
     def delete(cls, _id: int):
-        """ /user/<_id:int> - Delete a user."""
-        user_found = UserModel.find_by_id(_id=_id)
-        if user_found:
-            user_found.delete()
-            return {'message': ACCOUNT_SUCCESSFULLY_DELETED}
-
-        abort(400, message=USER_DOES_NOT_EXIST.format(_id))
+        """ /user/<id> - Delete a user."""
+        user = UserModel.find_by_id(_id=_id)
+        if user:
+            try:
+                user.delete()
+                return {'message': ACCOUNT_SUCCESSFULLY_DELETED}
+            except Exception:
+                abort(500, message=SERVER_ERROR)
+        abort(400, message=ACCOUNT_DOES_NOT_EXIST)
 
 
 class UserList(Resource):
@@ -191,14 +202,13 @@ class TokenRefresh(Resource):
 
 
 class UserActivation(Resource):
-    """ /public/activation/<id> - Activate or deactivate public user"""""
+    """ /user/activation/<id> - Activate or deactivate public user"""""
     @classmethod
     @jwt_required()
     @admin_required
     def put(cls, _id: int):
         args = active_parser.parse_args(strict=True)
         user = UserModel.find_without_active(_id)
-
         if user:
             user.active = args.active
             user.updated_at = datetime.utcnow()
@@ -206,5 +216,5 @@ class UserActivation(Resource):
                 user.save()
                 return {'messsage': ACCOUNT_SUCCESSFULLY_UPDATED}
             except Exception:
-                abort(500, message='Un problème est survenu. Veuillez réessayer.')
-        abort(400, message=USER_DOES_NOT_EXIST.format(_id))
+                abort(500, message=SERVER_ERROR)
+        abort(400, message=ACCOUNT_DOES_NOT_EXIST)
