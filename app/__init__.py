@@ -1,9 +1,9 @@
-from dotenv import load_dotenv
+#from dotenv import load_dotenv
 import os
 from datetime import timedelta
 
 from flask import Flask, jsonify
-from flask_restful import Resource, Api
+from flask_restful import Api
 from flask_jwt_extended import JWTManager
 
 from routes import ROUTES
@@ -13,7 +13,7 @@ from app.models.admin import AdminModel
 from app.models.organizer import OrganizerModel
 from app.models.user import UserModel
 
-load_dotenv(f"{os.getcwd()}/.env")
+# load_dotenv(f"{os.getcwd()}/.env")
 
 app = Flask(__name__)
 
