@@ -8,8 +8,6 @@ Flask-Script
 Flask-SQLAlchemy
 marshmallow
 marshmallow-sqlalchemy
-mysqlclient
-python-dotenv
 SQLAlchemy
 uwsgi
 psycopg2
