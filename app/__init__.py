@@ -19,7 +19,9 @@ app = Flask(__name__)
 
 ACCESS_EXPIRES = timedelta(hours=1)
 
-app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DB_URI')
+app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get(
+    'HEROKU_POSTGRESQL_IVORY_URL').replace('postgres://', 'postgresql://')
+# os.getenv('DB_URI')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.secret_key = os.getenv('FLASK_KEY')
 app.config["JWT_SECRET_KEY"] = os.getenv('JWT_SECRET_KEY')

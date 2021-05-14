@@ -12,3 +12,4 @@ mysqlclient
 python-dotenv
 SQLAlchemy
 uwsgi
+psycopg2
