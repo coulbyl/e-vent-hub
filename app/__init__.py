@@ -1,17 +1,18 @@
 #from dotenv import load_dotenv
+from app.models.user import UserModel
+from app.models.organizer import OrganizerModel
+from app.models.admin import AdminModel
+from app.models.token import TokenBlockList
+from routes import ROUTES
+from flask_jwt_extended import JWTManager
+from flask_restful import Api
 import os
 from datetime import timedelta
 
 from flask import Flask, jsonify
-from flask_restful import Api
-from flask_jwt_extended import JWTManager
+import flask.scaffold
+flask.helpers._endpoint_from_view_func = flask.scaffold._endpoint_from_view_func
 
-from routes import ROUTES
-
-from app.models.token import TokenBlockList
-from app.models.admin import AdminModel
-from app.models.organizer import OrganizerModel
-from app.models.user import UserModel
 
 # load_dotenv(f"{os.getcwd()}/.env")
 
