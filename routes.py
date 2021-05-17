@@ -1,19 +1,19 @@
-from app.resources.user import (
+from resources.user import (
     User, UserRegister, UserList, UserPasswordReset,
     UserLogin, Logout, TokenRefresh, UserFavouriteEvent, UserActivation
 )
 
-from app.resources.organizer import (
+from resources.organizer import (
     Organizer, OrganizerActivation, OrganizerRegister, OrganizerList,
     OrganizerPasswordReset, OrganizerLogin
 )
 
-from app.resources.event import (
+from resources.event import (
     Event, EventStore, EventPublishedList, EventUnpublishedList, EventPublication,
     EventParticipant, EventAuthorization, EventUnauthorizedList
 )
 
-from app.resources.admin import (
+from resources.admin import (
     Admin, AdminRegister, AdminList, AdminLogin,
     AdminPasswordReset, AdminRole
 )

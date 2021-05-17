@@ -1,31 +1,28 @@
-#from dotenv import load_dotenv
-from app.models.user import UserModel
-from app.models.organizer import OrganizerModel
-from app.models.admin import AdminModel
-from app.models.token import TokenBlockList
-from routes import ROUTES
-from flask_jwt_extended import JWTManager
-from flask_restful import Api
+from dotenv import load_dotenv
 import os
 from datetime import timedelta
 
 from flask import Flask, jsonify
-import flask.scaffold
-flask.helpers._endpoint_from_view_func = flask.scaffold._endpoint_from_view_func
+from flask_restful import Api
+from flask_jwt_extended import JWTManager
 
+from routes import ROUTES
 
-# load_dotenv(f"{os.getcwd()}/.env")
+from models.token import TokenBlockList
+from models.admin import AdminModel
+from models.organizer import OrganizerModel
+from models.user import UserModel
+
+load_dotenv(f"{os.getcwd()}/.env")
 
 app = Flask(__name__)
 
 ACCESS_EXPIRES = timedelta(hours=1)
 
-app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get(
-    'HEROKU_POSTGRESQL_IVORY_URL').replace('postgres://', 'postgresql://')
-# os.getenv('DB_URI')
+app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DB_URI')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.secret_key = os.environ.get('FLASK_KEY')
-app.config["JWT_SECRET_KEY"] = os.environ.get('JWT_SECRET_KEY')
+app.secret_key = os.getenv('FLASK_KEY')
+app.config["JWT_SECRET_KEY"] = os.getenv('JWT_SECRET_KEY')
 app.config["JWT_ACCESS_TOKEN_EXPIRES"] = ACCESS_EXPIRES
 
 api = Api(app)
@@ -106,4 +103,4 @@ if __name__ == '__main__':
     from db import db
     db.init_app(app)
 
-    app.run(debug=True)
+    app.run(debug=os.getenv('DEBUG'))

@@ -43,7 +43,7 @@ class UserModel(db.Model):
         self.photo = photo
 
     def json(self):
-        from app.schema.event import EventSchema
+        from schema.event import EventSchema
         events_schema = EventSchema(many=True)
 
         return {

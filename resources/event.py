@@ -1,15 +1,15 @@
 from flask_restful import Resource, abort
-from app.models.event import EventModel
-from app.models.user import UserModel
-from app.parsers.event import post_parser, put_parser, active_parser, allow_parser
+from models.event import EventModel
+from models.user import UserModel
+from parsers.event import post_parser, put_parser, active_parser, allow_parser
 from datetime import datetime
 from flask_jwt_extended import jwt_required
-from app.resources.admin import admin_required
-from app.resources.organizer import organizer_required
-from app.resources.user import client_required
+from resources.admin import admin_required
+from resources.organizer import organizer_required
+from resources.user import client_required
 
 # Messages
-from app.resources import ACCOUNT_DOES_NOT_EXIST, EVENT_DOES_NOT_EXIST, EVENT_SUCCESSFULLY_DELETED, EVENT_SUCCESSFULLY_UPDATED, SERVER_ERROR
+from resources import ACCOUNT_DOES_NOT_EXIST, EVENT_DOES_NOT_EXIST, EVENT_SUCCESSFULLY_DELETED, EVENT_SUCCESSFULLY_UPDATED, SERVER_ERROR
 
 
 class EventStore(Resource):
