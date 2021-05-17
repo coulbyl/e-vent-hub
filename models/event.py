@@ -60,7 +60,7 @@ class EventModel(db.Model):
         self.organizer_id = organizer_id
 
     def json(self):
-        from app.schema.user import UserSchema
+        from schema.user import UserSchema
         users_schema = UserSchema(many=True)
 
         return {

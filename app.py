@@ -8,10 +8,10 @@ from flask_jwt_extended import JWTManager
 
 from routes import ROUTES
 
-from app.models.token import TokenBlockList
-from app.models.admin import AdminModel
-from app.models.organizer import OrganizerModel
-from app.models.user import UserModel
+from models.token import TokenBlockList
+from models.admin import AdminModel
+from models.organizer import OrganizerModel
+from models.user import UserModel
 
 load_dotenv(f"{os.getcwd()}/.env")
 

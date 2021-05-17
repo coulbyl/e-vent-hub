@@ -7,13 +7,13 @@ from flask_jwt_extended import (
 from werkzeug.security import check_password_hash, generate_password_hash, safe_str_cmp
 from flask_restful import Resource, abort
 
-from app.models.organizer import OrganizerModel
-from app.parsers.organizer import post_parser, put_parser, reset_parser, login_parser
-from app.parsers.event import active_parser
+from models.organizer import OrganizerModel
+from parsers.organizer import post_parser, put_parser, reset_parser, login_parser
+from parsers.event import active_parser
 from .admin import admin_required
 
 # Message
-from app.resources import (
+from resources import (
     ACCOUNT_DOES_NOT_EXIST, ACCOUNT_ALREADY_EXISTS, ACCOUNT_SUCCESSFULLY_CREATED,
     ACCOUNT_SUCCESSFULLY_DELETED, ACCOUNT_SUCCESSFULLY_UPDATED, INVALIDCREDENTIALS,
     SERVER_ERROR)

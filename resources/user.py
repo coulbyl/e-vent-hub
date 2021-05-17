@@ -5,17 +5,17 @@ from flask_jwt_extended import (
     get_jwt_identity
 )
 
-from app.models.user import UserModel
-from app.models.event import EventModel
-from app.models.token import TokenBlockList
-from app.parsers.user import post_parser, put_parser, reset_parser, login_parser
-from app.parsers.event import active_parser
+from models.user import UserModel
+from models.event import EventModel
+from models.token import TokenBlockList
+from parsers.user import post_parser, put_parser, reset_parser, login_parser
+from parsers.event import active_parser
 from werkzeug.security import check_password_hash, safe_str_cmp, generate_password_hash
 from datetime import datetime
 from .admin import admin_required
 
 # Message
-from app.resources import (
+from resources import (
     ACCOUNT_DOES_NOT_EXIST, ACCOUNT_ALREADY_EXISTS, ACCOUNT_SUCCESSFULLY_CREATED,
     ACCOUNT_SUCCESSFULLY_DELETED, ACCOUNT_SUCCESSFULLY_UPDATED, EVENT_DOES_NOT_EXIST,
     INVALIDCREDENTIALS, SERVER_ERROR)
