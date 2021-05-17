@@ -22,6 +22,10 @@ Mysql database used by default.
 [comment]: <> (Install all packages from the requirements file.)
     pip install -r requirements.txt
 
+[comment]: <> (Run the migrations and seeder.)
+    py manage.py db upgrade
+    py manage.py admin_seeder
+
 [comment]: <> (Run the app.)
     flask run
 ```
