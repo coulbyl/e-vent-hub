@@ -29,3 +29,7 @@ Mysql database used by default.
 [comment]: <> (Run the app.)
     flask run
 ```
+
+## API Routes
+
+Comming...
