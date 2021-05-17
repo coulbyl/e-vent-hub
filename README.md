@@ -32,6 +32,7 @@ Mysql database used by default.
 
 ## API Routes
 
+```
 [POST]
 /user/register
 /user/login
@@ -69,3 +70,4 @@ Mysql database used by default.
 
 /logout [DELETE]
 /token/refresh [GET]
+```
