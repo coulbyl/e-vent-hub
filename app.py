@@ -5,7 +5,7 @@ from datetime import timedelta
 from flask import Flask, jsonify
 from flask_restful import Api
 from flask_jwt_extended import JWTManager
-
+from flask_cors import CORS
 from routes import ROUTES
 
 from models.token import TokenBlockList
@@ -16,6 +16,7 @@ from models.user import UserModel
 load_dotenv(f"{os.getcwd()}/.env")
 
 app = Flask(__name__)
+CORS(app)
 
 ACCESS_EXPIRES = timedelta(hours=1)
 
