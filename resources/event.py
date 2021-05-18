@@ -1,3 +1,4 @@
+from utils import UPLOAD_FOLDER, remove_file_upload, saveFileUploaded
 from flask_restful import Resource, abort
 from models.event import EventModel
 from models.user import UserModel
@@ -9,7 +10,7 @@ from resources.organizer import organizer_required
 from resources.user import client_required
 
 # Messages
-from resources import ACCOUNT_DOES_NOT_EXIST, EVENT_DOES_NOT_EXIST, EVENT_SUCCESSFULLY_DELETED, EVENT_SUCCESSFULLY_UPDATED, SERVER_ERROR
+from resources import ACCOUNT_DOES_NOT_EXIST, EVENT_DOES_NOT_EXIST, EVENT_SUCCESSFULLY_DELETED, EVENT_SUCCESSFULLY_UPDATED, EXTENTION_ERROR, SERVER_ERROR
 
 
 class EventStore(Resource):
@@ -20,6 +21,11 @@ class EventStore(Resource):
     def post(cls):
         data = post_parser.parse_args(strict=True)
         event = EventModel(**data)
+        if data['image']:
+            response = saveFileUploaded(data['image'], 'event')
+            if response is None:
+                abort(400, message=EXTENTION_ERROR)
+            event.image = response
         try:
             event.save()
             return event.json(), 201
@@ -93,15 +99,22 @@ class Event(Resource):
         """ /event/<id> - Update event."""
         event = EventModel.find_without_active(_id=_id)
         if event:
+            existing_image = event.image
             data = put_parser.parse_args(strict=True)
             event.name = data.name
             event.location = data.location
             event.description = data.description
             event.price = data.price
             event.available_places = data.available_places
+            event.remaining_places = data.available_places
             event.start_at = data.start_at
             event.end_at = data.end_at
-            event.image = data.image
+            if data['image']:
+                response = saveFileUploaded(data['image'], 'event')
+                if response is None:
+                    abort(400, message=EXTENTION_ERROR)
+                event.image = response
+                remove_file_upload(f"{UPLOAD_FOLDER}/event/{existing_image}")
             event.active = data.active
             event.updated_at = datetime.utcnow()
             try:

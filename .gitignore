@@ -6,6 +6,11 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+# Files uploaded
+uploads/*/*.png
+uploads/*/*.jpeg
+uploads/*/*.jpg
+
 # Environments
 .env
 .venv

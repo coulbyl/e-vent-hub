@@ -22,7 +22,9 @@ CORS(app)
 
 ACCESS_EXPIRES = timedelta(hours=1)
 
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+#app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+# n'accepte que les demandes dont la taille ne dépasse pas 1 Mo.
+app.config['MAX_CONTENT_LENGTH'] = 1024 * 1024
 app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DB_URI')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.secret_key = os.getenv('FLASK_KEY')

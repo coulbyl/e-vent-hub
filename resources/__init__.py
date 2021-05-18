@@ -12,3 +12,5 @@ EVENT_SUCCESSFULLY_DELETED = "Votre évènement a été supprimé avec succès."
 
 SERVER_ERROR = "Un problème est survenu. Veuillez contacter le service d'assistance."
 INVALIDCREDENTIALS = "Informations d'identification non valides."
+
+EXTENTION_ERROR = "L'image doit être de type png, jpg ou jpeg."
