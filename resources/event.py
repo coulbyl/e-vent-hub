@@ -34,16 +34,23 @@ class EventParticipant(Resource):
     @client_required
     def post(cls, event_id: int, user_id: int):
         event = EventModel.find_by_id(_id=event_id)
-        if event:
+        if event and event.remaining_places > 0:
             participant = UserModel.find_by_id(_id=user_id)
             if participant:
-                try:
-                    event.add_participant(participant)
-                    return {"message": "Inscription terminée avec succès."}, 201
-                except Exception:
-                    abort(500, SERVER_ERROR)
+                event_data = event.json()
+                participants = event_data['participants']
+                participant_exists = [p for p in participants if p['_id'] == user_id]
+                if len(participant_exists) == 0:
+                    try:
+                        event.add_participant(participant)
+                        event.remaining_places -= 1
+                        event.save()
+                        return {"message": "Inscription terminée avec succès."}, 201
+                    except Exception:
+                        abort(500, SERVER_ERROR)
+                abort(400, message='Vous êtes déjà inscrit à cet événement.')
             abort(404, message=ACCOUNT_DOES_NOT_EXIST)
-        abort(404, message=EVENT_DOES_NOT_EXIST)
+        abort(401, message="Désolé, il n'y a plus de places disponibles pour cet événement.")
 
     @classmethod
     @jwt_required()
@@ -53,11 +60,18 @@ class EventParticipant(Resource):
         if event:
             participant = UserModel.find_by_id(_id=user_id)
             if participant:
-                try:
-                    event.remove_participant(participant)
-                    return {"message": "Inscription retirée avec succès."}, 201
-                except Exception:
-                    abort(500, message=SERVER_ERROR)
+                event_data = event.json()
+                participants = event_data['participants']
+                participant_exists = [p for p in participants if p['_id'] == user_id]
+                if len(participant_exists) > 0:
+                    try:
+                        event.remove_participant(participant)
+                        event.remaining_places += 1
+                        event.save()
+                        return {"message": "Inscription retirée avec succès."}, 201
+                    except Exception:
+                        abort(500, message=SERVER_ERROR)
+                abort(400, message="Désolé, vous n'êtes pas inscrit à cet événement.")
             abort(404, message=ACCOUNT_DOES_NOT_EXIST)
         abort(404, message=EVENT_DOES_NOT_EXIST)
 
