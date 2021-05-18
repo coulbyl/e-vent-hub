@@ -1,5 +1,6 @@
 from datetime import datetime
 import functools
+from utils import UPLOAD_FOLDER, remove_file_upload, saveFileUploaded
 from flask_jwt_extended import (
     jwt_required, create_access_token,
     create_refresh_token, get_jwt_identity
@@ -15,8 +16,8 @@ from .admin import admin_required
 # Message
 from resources import (
     ACCOUNT_DOES_NOT_EXIST, ACCOUNT_ALREADY_EXISTS, ACCOUNT_SUCCESSFULLY_CREATED,
-    ACCOUNT_SUCCESSFULLY_DELETED, ACCOUNT_SUCCESSFULLY_UPDATED, INVALIDCREDENTIALS,
-    SERVER_ERROR)
+    ACCOUNT_SUCCESSFULLY_DELETED, ACCOUNT_SUCCESSFULLY_UPDATED, EXTENTION_ERROR,
+    INVALIDCREDENTIALS, SERVER_ERROR)
 
 
 def organizer_required(func):
@@ -37,8 +38,12 @@ class OrganizerRegister(Resource):
         data = post_parser.parse_args(strict=True)
         if OrganizerModel.find_by_email(email=data.email):
             abort(400, message=ACCOUNT_ALREADY_EXISTS.format(data.email))
-
         organizer = OrganizerModel(**data)
+        if data['photo']:
+            response = saveFileUploaded(data['photo'], 'organizer')
+            if response is None:
+                abort(400, message=EXTENTION_ERROR)
+            organizer.photo = response
         try:
             organizer.save()
             access_token = create_access_token(identity=organizer._uuid, fresh=True)
@@ -70,12 +75,19 @@ class Organizer(Resource):
         """ /organizer/<id> - Update a organizer."""
         organizer_found = OrganizerModel.find_by_id(_id=_id)
         if organizer_found:
+            existing_photo = organizer_found.photo
             data = put_parser.parse_args(strict=True)
             organizer_found.name = data.name
             organizer_found.email = data.email
             organizer_found.contacts = data.contacts
-            organizer_found.photo = data.photo
+            if data['photo']:
+                response = saveFileUploaded(data['photo'], 'organizer')
+                if response is None:
+                    abort(400, message=EXTENTION_ERROR)
+                organizer_found.photo = response
+                remove_file_upload(f"{UPLOAD_FOLDER}/organizer/{existing_photo}")
             organizer_found.updated_at = datetime.utcnow()
+
             try:
                 organizer_found.save()
                 return {'messsage': ACCOUNT_SUCCESSFULLY_UPDATED}

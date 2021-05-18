@@ -1,8 +1,10 @@
 from uuid import uuid4
 import json
 from datetime import datetime
+import os
 
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
+UPLOAD_FOLDER = f"{os.getcwd()}/uploads"
 
 
 def allowed_file(filename):
@@ -21,3 +23,15 @@ def json_dump_(datetime_object):
 
 def generate_uuid():
     return str(uuid4())[:8]
+
+
+def saveFileUploaded(fileStorage, subFolder: str):
+    filename = f"{generate_uuid()}{os.path.splitext(fileStorage.filename)[1]}"
+    if allowed_file(fileStorage.filename):
+        fileStorage.save(os.path.join(f"{UPLOAD_FOLDER}/{subFolder}", filename))
+        return filename
+
+
+def remove_file_upload(file_path):
+    if os.path.exists(file_path):
+        os.remove(file_path)

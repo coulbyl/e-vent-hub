@@ -50,24 +50,25 @@ Mysql database used by default.
 /events/unpublished
 /events/unauthorized
 
-/user/<int:\_id>
-/user/password-reset/<int:\_id>
+/user/<int:_id>
+/user/password-reset/<int:_id>
 /user/favourite-event/<int:user_id>/<int:event_id>
 
-/organizer/<int:\_id>
-/organizer/password-reset/<int:\_id>
+/organizer/<int:_id>
+/organizer/password-reset/<int:_id>
 
-/event/<int:\_id>
-/event/publication/<int:\_id>
-/event/authorization/<int:\_id>
+/event/<int:_id>
+/event/publication/<int:_id>
+/event/authorization/<int:_id>
 /event/participant/<int:event_id>/<int:user_id>
 
-/admin/<int:\_id>
-/admin/password-reset/<int:\_id>
-/admin/role/<int:\_id>
-/user/activation/<int:\_id>
-/organizer/activation/<int:\_id>
+/admin/<int:_id>
+/admin/password-reset/<int:_id>
+/admin/role/<int:_id>
+/user/activation/<int:_id>
+/organizer/activation/<int:_id>
 
 /logout [DELETE]
+/upload/<string:filename>/<string:folder> [GET, folder -> client | event | organizer]
 /token/refresh [GET]
 ```

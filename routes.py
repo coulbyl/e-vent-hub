@@ -18,6 +18,8 @@ from resources.admin import (
     AdminPasswordReset, AdminRole
 )
 
+from resources.upload import Upload
+
 ROUTES = [
     # User
     {'resource': User, 'endpoint': '/user/<int:_id>'},
@@ -66,4 +68,5 @@ ROUTES = [
     # Global
     {'resource': Logout, 'endpoint': '/logout'},
     {'resource': TokenRefresh, 'endpoint': '/token/refresh'},
+    {'resource': Upload, 'endpoint': '/upload/<string:filename>/<string:folder>'},
 ]

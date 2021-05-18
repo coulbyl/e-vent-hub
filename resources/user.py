@@ -13,12 +13,13 @@ from parsers.event import active_parser
 from werkzeug.security import check_password_hash, safe_str_cmp, generate_password_hash
 from datetime import datetime
 from .admin import admin_required
+from utils import remove_file_upload, saveFileUploaded, UPLOAD_FOLDER
 
 # Message
 from resources import (
     ACCOUNT_DOES_NOT_EXIST, ACCOUNT_ALREADY_EXISTS, ACCOUNT_SUCCESSFULLY_CREATED,
     ACCOUNT_SUCCESSFULLY_DELETED, ACCOUNT_SUCCESSFULLY_UPDATED, EVENT_DOES_NOT_EXIST,
-    INVALIDCREDENTIALS, SERVER_ERROR)
+    EXTENTION_ERROR, INVALIDCREDENTIALS, SERVER_ERROR)
 
 
 def client_required(func):
@@ -37,11 +38,16 @@ class UserRegister(Resource):
     @classmethod
     def post(cls):
         data = post_parser.parse_args(strict=True)
-        #print(data.photo.files, ' ----- files --- ')
         if UserModel.find_by_email(email=data.email):
             abort(400, message=ACCOUNT_ALREADY_EXISTS)
-
         user = UserModel(**data)
+        if data['photo']:
+            response = saveFileUploaded(data['photo'], 'client')
+            print(response)
+            if response is None:
+                abort(400, message=EXTENTION_ERROR)
+            user.photo = response
+
         try:
             user.save()
             access_token = create_access_token(identity=user._uuid, fresh=True)
@@ -108,12 +114,18 @@ class User(Resource):
         """ /user/<id> - Update a user."""
         user_found = UserModel.find_by_id(_id=_id)
         if user_found:
+            existing_photo = user_found.photo
             data = put_parser.parse_args(strict=True)
             user_found.firstname = data.firstname
             user_found.lastname = data.lastname
             user_found.email = data.email
             user_found.contacts = data.contacts
-            user_found.photo = data.photo
+            if data['photo']:
+                response = saveFileUploaded(data['photo'], 'client')
+                if response is None:
+                    abort(400, message=EXTENTION_ERROR)
+                user_found.photo = response
+                remove_file_upload(f"{UPLOAD_FOLDER}/client/{existing_photo}")
             user_found.updated_at = datetime.utcnow()
             try:
                 user_found.save()

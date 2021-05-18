@@ -1,4 +1,5 @@
 from flask_restful import reqparse
+from werkzeug import datastructures
 
 _help = 'Désolé, ce champ est obligatoire'
 post_parser = reqparse.RequestParser()
@@ -9,7 +10,7 @@ post_parser.add_argument('price', type=str)
 post_parser.add_argument('available_places', type=int, required=True, help=_help)
 post_parser.add_argument('start_at', type=str, required=True, help=_help)
 post_parser.add_argument('end_at', type=str, required=True, help=_help)
-post_parser.add_argument('image', type=str)
+post_parser.add_argument('image', type=datastructures.FileStorage, location='files')
 post_parser.add_argument('organizer_id', type=int, required=True, help=_help)
 
 put_parser = post_parser.copy()

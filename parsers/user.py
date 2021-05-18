@@ -8,7 +8,7 @@ post_parser.add_argument('lastname', type=str, required=True, help=_help)
 post_parser.add_argument('email', type=str, required=True, help=_help)
 post_parser.add_argument('password', type=str, required=True, help=_help)
 post_parser.add_argument('contacts', type=str, required=True, help=_help)
-post_parser.add_argument('photo', type=str)
+post_parser.add_argument('photo', type=datastructures.FileStorage, location='files')
 
 put_parser = post_parser.copy()
 put_parser.remove_argument('password')
