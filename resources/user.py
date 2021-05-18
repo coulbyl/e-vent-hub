@@ -37,6 +37,7 @@ class UserRegister(Resource):
     @classmethod
     def post(cls):
         data = post_parser.parse_args(strict=True)
+        #print(data.photo.files, ' ----- files --- ')
         if UserModel.find_by_email(email=data.email):
             abort(400, message=ACCOUNT_ALREADY_EXISTS)
 

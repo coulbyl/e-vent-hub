@@ -1,4 +1,5 @@
 from flask_restful import reqparse
+from werkzeug import datastructures
 
 _help = 'Désolé, ce champ est obligatoire'
 post_parser = reqparse.RequestParser()

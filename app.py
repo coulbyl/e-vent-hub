@@ -15,11 +15,14 @@ from models.user import UserModel
 
 load_dotenv(f"{os.getcwd()}/.env")
 
+UPLOAD_FOLDER = f"{os.getcwd()}/uploads"
+
 app = Flask(__name__)
 CORS(app)
 
 ACCESS_EXPIRES = timedelta(hours=1)
 
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DB_URI')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.secret_key = os.getenv('FLASK_KEY')
