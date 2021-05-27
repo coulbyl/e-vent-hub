@@ -58,6 +58,7 @@ Mysql database used by default.
 /organizer/password-reset/<int:_id>
 
 /event/<int:_id>
+/events/<int:_id> [GET - one event without condition.]
 /event/publication/<int:_id>
 /event/authorization/<int:_id>
 /event/participant/<int:event_id>/<int:user_id>
