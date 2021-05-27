@@ -30,6 +30,14 @@ source .venv\\Scripts\\activate
 pip install -r requirements.txt
 ```
 
+- Dotenv (.env) activation
+
+```
+cp .env.example .env
+```
+
+and update the `.env` file with your data
+
 - Run the migrations and seeder.
 
 ```
