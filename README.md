@@ -39,7 +39,9 @@ py manage.py admin_seeder
 
 - Run the app.
 
-`flask run`
+```
+flask run
+```
 
 ### Uploads folders
 
