@@ -45,7 +45,7 @@ flask run
 
 ### Uploads folders
 
-At the root of the project, type the following commands in your terminal.
+At the root of the project, type the following commands in your terminal or create these folders manually.
 
 ```
 mkdir uploads
