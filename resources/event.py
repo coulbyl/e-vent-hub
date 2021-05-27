@@ -196,3 +196,13 @@ class EventUnauthorizedList(Resource):
     @classmethod
     def get(cls):
         return {'events': [event.json() for event in EventModel.find_allow(False)]}
+
+
+class AllEvent(Resource):
+    """ /events/_id """
+    @classmethod
+    def get(cls, _id):
+        event = EventModel.find_without_active(_id=_id)
+        if event:
+            return {'event': event.json()}
+        abort(404, message=EVENT_DOES_NOT_EXIST)

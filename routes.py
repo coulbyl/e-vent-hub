@@ -10,7 +10,7 @@ from resources.organizer import (
 
 from resources.event import (
     Event, EventStore, EventPublishedList, EventUnpublishedList, EventPublication,
-    EventParticipant, EventAuthorization, EventUnauthorizedList
+    EventParticipant, EventAuthorization, EventUnauthorizedList, AllEvent
 )
 
 from resources.admin import (
@@ -50,6 +50,7 @@ ROUTES = [
     {'resource': EventUnpublishedList, 'endpoint': '/events/unpublished'},
     {'resource': EventAuthorization, 'endpoint': '/event/authorization/<int:_id>'},
     {'resource': EventUnauthorizedList, 'endpoint': '/events/unauthorized'},
+    {'resource': AllEvent, 'endpoint': '/events/<int:_id>'},
     {
         'resource': EventParticipant,
         'endpoint': '/event/participant/<int:event_id>/<int:user_id>'
