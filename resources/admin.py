@@ -87,7 +87,7 @@ class Admin(Resource):
             admin_found.updated_at = datetime.utcnow()
             try:
                 admin_found.save()
-                return {'messsage': ACCOUNT_SUCCESSFULLY_UPDATED}
+                return {'message': ACCOUNT_SUCCESSFULLY_UPDATED}
             except Exception:
                 abort(500, message=SERVER_ERROR)
         abort(400, message=ACCOUNT_DOES_NOT_EXIST)
@@ -131,7 +131,7 @@ class AdminPasswordReset(Resource):
                 admin_found.updated_at = datetime.utcnow()
                 try:
                     admin_found.save()
-                    return {'messsage': 'Mot de passe réinitialisé avec succès.'}
+                    return {'message': 'Mot de passe réinitialisé avec succès.'}
                 except Exception:
                     abort(500, message=SERVER_ERROR)
             abort(400, message="Un problème est survenu. Vérifiez votre mot de passe.")
@@ -170,7 +170,7 @@ class AdminRole(Resource):
             admin_found.updated_at = datetime.utcnow()
             try:
                 admin_found.save()
-                return {'messsage': ACCOUNT_SUCCESSFULLY_UPDATED}
+                return {'message': ACCOUNT_SUCCESSFULLY_UPDATED}
             except Exception:
                 abort(500, message=SERVER_ERROR)
         abort(400, message=ACCOUNT_DOES_NOT_EXIST)
