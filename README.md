@@ -56,6 +56,8 @@ mkdir uploads/organizer
 
 ## API Routes
 
+The complete documentation is available on Postman.
+
 - POST
 
 ```
