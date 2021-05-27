@@ -129,7 +129,7 @@ class User(Resource):
             user_found.updated_at = datetime.utcnow()
             try:
                 user_found.save()
-                return {'messsage': ACCOUNT_SUCCESSFULLY_UPDATED}
+                return {'message': ACCOUNT_SUCCESSFULLY_UPDATED}
             except Exception:
                 abort(500, message=SERVER_ERROR)
         abort(400, message=ACCOUNT_DOES_NOT_EXIST)
@@ -171,7 +171,7 @@ class UserPasswordReset(Resource):
                 user_found.password = generate_password_hash(data.new_password)
                 user_found.updated_at = datetime.utcnow()
                 user_found.save()
-                return {'messsage': 'Mot de passe réinitialisé avec succès.'}
+                return {'message': 'Mot de passe réinitialisé avec succès.'}
             abort(400, message="Un problème est survenu. Vérifiez votre mot de passe.")
         abort(400, message=ACCOUNT_DOES_NOT_EXIST)
 
@@ -227,7 +227,7 @@ class UserActivation(Resource):
             user.updated_at = datetime.utcnow()
             try:
                 user.save()
-                return {'messsage': ACCOUNT_SUCCESSFULLY_UPDATED}
+                return {'message': ACCOUNT_SUCCESSFULLY_UPDATED}
             except Exception:
                 abort(500, message=SERVER_ERROR)
         abort(400, message=ACCOUNT_DOES_NOT_EXIST)

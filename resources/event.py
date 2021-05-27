@@ -119,7 +119,7 @@ class Event(Resource):
             event.updated_at = datetime.utcnow()
             try:
                 event.save()
-                return {'messsage': EVENT_SUCCESSFULLY_UPDATED}
+                return {'message': EVENT_SUCCESSFULLY_UPDATED}
             except Exception:
                 abort(500, message=SERVER_ERROR)
         abort(400, message=EVENT_DOES_NOT_EXIST)
@@ -152,7 +152,7 @@ class EventPublication(Resource):
             event.updated_at = datetime.utcnow()
             try:
                 event.save()
-                return {'messsage': EVENT_SUCCESSFULLY_UPDATED}
+                return {'message': EVENT_SUCCESSFULLY_UPDATED}
             except Exception:
                 abort(500, message=SERVER_ERROR)
         abort(400, message=EVENT_DOES_NOT_EXIST)
@@ -185,7 +185,7 @@ class EventAuthorization(Resource):
             event_found.updated_at = datetime.utcnow()
             try:
                 event_found.save()
-                return {'messsage': EVENT_SUCCESSFULLY_UPDATED}
+                return {'message': EVENT_SUCCESSFULLY_UPDATED}
             except Exception:
                 abort(500, message=SERVER_ERROR)
         abort(400, message=EVENT_DOES_NOT_EXIST)

@@ -2,40 +2,61 @@
 
 Api to manage events.
 
-## Implementation
+### Implementation
 
 This project is implemented using Flask, Flask-RESTful, Flask-JWT-Extended, Flask-SQLALchemy, and Flask-Migrate.
 
 Mysql database used by default.
 
-## Locally Installation
+### Locally Installation
 
-Install virtual environment.
+After cloning the repository.
 
-`py -m venv .venv`
+- Install virtual environment.
 
-Activate venv on windows with git bash or cmd | remove "source" for cmd.
+```
+py -m venv .venv
+```
 
-`source .venv\\Scripts\\activate`
+- Activate venv on windows with git bash or cmd | remove "source" for cmd.
 
-Install all packages from the requirements file.
-`pip install -r requirements.txt`
+```
+source .venv\\Scripts\\activate
+```
 
-Run the migrations and seeder.
+- Install all packages from the requirements file.
+
+```
+pip install -r requirements.txt
+```
+
+- Run the migrations and seeder.
 
 ```
 py manage.py db upgrade
 py manage.py admin_seeder
 ```
 
-Run the app.
+- Run the app.
 
 `flask run`
 
-## API Routes
+### Uploads folders
+
+At the root of the project, type the following commands in your terminal.
 
 ```
-[POST]
+mkdir uploads
+mkdir uploads/client
+mkdir uploads/event
+mkdir uploads/organizer
+```
+
+## API Routes
+
+- POST
+
+```
 /user/register
 /user/login
 /organizer/register
@@ -43,8 +64,11 @@ Run the app.
 /event/store
 /admin/register
 /admin/login
+```
 
-[GET, PUT, DELETE]
+- GET, PUT and DELETE
+
+```
 /users
 /organizers
 /admins
@@ -60,7 +84,7 @@ Run the app.
 /organizer/password-reset/<int:_id>
 
 /event/<int:_id>
-/events/<int:_id> [GET - one event without condition.]
+/events/<int:_id> [GET - an event without any conditions.]
 /event/publication/<int:_id>
 /event/authorization/<int:_id>
 /event/participant/<int:event_id>/<int:user_id>
