@@ -1,6 +1,5 @@
 from db import db
 from datetime import datetime
-from werkzeug.security import generate_password_hash
 from utils import json_dump_
 
 participant_events = db.Table(
@@ -34,15 +33,14 @@ class EventModel(db.Model):
         db.ForeignKey('organizers._id'),
         nullable=False
     )
-    # organizer = db.relationship('OrganizerModel', back_populates="events")
     participants = db.relationship(
         'UserModel',
         secondary=participant_events,
-        cascade="all,delete",
         lazy='subquery'
     )
     created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
     updated_at = db.Column(db.DateTime)
+    deleted = db.Column(db.Boolean, default=False, nullable=False)
 
     def __init__(
         self, name, location, description, price,
@@ -76,6 +74,7 @@ class EventModel(db.Model):
             'image': self.image,
             'active': self.active,
             'allow': self.allow,
+            'deleted': self.deleted,
             'organizer_id': self.organizer_id,
             'participants': users_schema.dump(self.participants),
             'created_at': json_dump_(self.created_at),
@@ -88,7 +87,7 @@ class EventModel(db.Model):
         return (
             cls.query.filter_by(name=name)
             .filter_by(active=active)
-            .filter_by(allow=allow).first()
+            .filter_by(allow=allow).filter_by(deleted=False).first()
         )
 
     @classmethod
@@ -97,22 +96,25 @@ class EventModel(db.Model):
         return (
             cls.query.filter_by(_id=_id)
             .filter_by(active=active)
-            .filter_by(allow=allow).first()
+            .filter_by(allow=allow).filter_by(deleted=False).first()
         )
 
     @classmethod
     def find_without_active(cls, _id: int):
         """ Find an event by its ID without relying on the active property in the database."""
-        return cls.query.filter_by(_id=_id).first()
+        return cls.query.filter_by(_id=_id).filter_by(deleted=False).first()
 
     @classmethod
     def find_all(cls, active=True, allow=True):
         """ Find all events in the database. """
-        return cls.query.filter_by(active=active).filter_by(allow=True).all()
+        return cls.query.filter_by(
+            active=active).filter_by(
+            deleted=False).filter_by(
+            allow=True).all()
 
     @classmethod
     def find_allow(cls, allow=True):
-        return cls.query.filter_by(allow=allow).all()
+        return cls.query.filter_by(allow=allow).filter_by(deleted=False).all()
 
     def save(self):
         """ Save new event into database. """

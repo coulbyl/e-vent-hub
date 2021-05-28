@@ -54,8 +54,8 @@ class OrganizerRegister(Resource):
                 'token': {'access_token': access_token, 'refresh_token': refresh_token},
                 'message': ACCOUNT_SUCCESSFULLY_CREATED
             }, 201
-        except Exception:
-            abort(500, message=SERVER_ERROR)
+        except Exception as e:
+            abort(500, message=SERVER_ERROR.format(type(e).__name__))
 
 
 class Organizer(Resource):
@@ -91,8 +91,8 @@ class Organizer(Resource):
             try:
                 organizer_found.save()
                 return {'message': ACCOUNT_SUCCESSFULLY_UPDATED}
-            except Exception:
-                abort(500, message=SERVER_ERROR)
+            except Exception as e:
+                abort(500, message=SERVER_ERROR.format(type(e).__name__))
         abort(400, message=ACCOUNT_DOES_NOT_EXIST)
 
     @classmethod
@@ -105,8 +105,8 @@ class Organizer(Resource):
             try:
                 organizer.delete()
                 return {'message': ACCOUNT_SUCCESSFULLY_DELETED}
-            except Exception:
-                abort(500, message=SERVER_ERROR)
+            except Exception as e:
+                abort(500, message=SERVER_ERROR.format(type(e).__name__))
         abort(400, message=ACCOUNT_DOES_NOT_EXIST)
 
 
@@ -169,6 +169,6 @@ class OrganizerActivation(Resource):
             try:
                 organizer.save()
                 return {'message': ACCOUNT_SUCCESSFULLY_UPDATED}
-            except Exception:
-                abort(500, message=SERVER_ERROR)
+            except Exception as e:
+                abort(500, message=SERVER_ERROR.format(type(e).__name__))
         abort(400, message=ACCOUNT_DOES_NOT_EXIST)

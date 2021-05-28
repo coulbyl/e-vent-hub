@@ -33,6 +33,7 @@ class UserModel(db.Model):
     active = db.Column(db.Boolean, default=True, nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
     updated_at = db.Column(db.DateTime)
+    deleted = db.Column(db.Boolean, default=False, nullable=False)
 
     def __init__(self, firstname, lastname, email, password, contacts, photo):
         self.firstname = firstname
@@ -55,6 +56,7 @@ class UserModel(db.Model):
             'photo': self.photo,
             'favourite_events': events_schema.dump(self.favourite_events),
             'active': self.active,
+            'deleted': self.deleted,
             'created_at': json_dump_(self.created_at),
             'updated_at': json_dump_(self.updated_at)
         }
@@ -62,26 +64,35 @@ class UserModel(db.Model):
     @classmethod
     def find_by_email(cls, email: str, active=True):
         """ Find a user by his EMAIL in the database. """
-        return cls.query.filter_by(email=email).filter_by(active=active).first()
+        return cls.query.filter_by(
+            email=email).filter_by(
+            deleted=False).filter_by(
+            active=active).first()
 
     @classmethod
     def find_by_id(cls, _id: int, active=True):
         """ Find a user by his ID in the database. """
-        return cls.query.filter_by(_id=_id).filter_by(active=active).first()
+        return cls.query.filter_by(
+            _id=_id).filter_by(
+            deleted=False).filter_by(
+            active=active).first()
 
     @classmethod
     def find_without_active(cls, _id: int):
         """ Find a user by its ID without relying on the active property in the database."""
-        return cls.query.filter_by(_id=_id).first()
+        return cls.query.filter_by(_id=_id).filter_by(deleted=False).first()
 
     @classmethod
     def find_by_uuid(cls, _uuid: int, active=True):
-        return cls.query.filter_by(_uuid=_uuid).filter_by(active=active).first()
+        return cls.query.filter_by(
+            _uuid=_uuid).filter_by(
+            deleted=False).filter_by(
+            active=active).first()
 
     @classmethod
     def find_all(cls, active=True):
         """ Find all user in the database. """
-        return cls.query.filter_by(active=active).all()
+        return cls.query.filter_by(active=active).filter_by(deleted=False).all()
 
     def save(self):
         """ Save new user into database. """

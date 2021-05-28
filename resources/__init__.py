@@ -10,7 +10,7 @@ EVENT_SUCCESSFULLY_CREATED = "Votre évènement a été créé avec succès."
 EVENT_SUCCESSFULLY_UPDATED = "Informations mises à jour avec succès."
 EVENT_SUCCESSFULLY_DELETED = "Votre évènement a été supprimé avec succès."
 
-SERVER_ERROR = "Un problème est survenu. Veuillez contacter le service d'assistance."
+SERVER_ERROR = "Error! Code: {}, Un problème est survenu. Veuillez contacter le service d'assistance."
 INVALIDCREDENTIALS = "Informations d'identification non valides."
 
 EXTENTION_ERROR = "L'image doit être de type png, jpg ou jpeg."

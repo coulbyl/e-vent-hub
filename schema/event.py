@@ -15,9 +15,9 @@ class EventSchema(ma.Schema):
             'end_at',
             'image',
             'organizer_id',
-            # 'participants',
             'created_at',
-            'updated_at'
+            'updated_at',
+            'deleted'
         )
 
     #participants = ma.Nested('UserSchema', many=True)
