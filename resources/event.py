@@ -10,7 +10,9 @@ from resources.organizer import organizer_required
 from resources.user import client_required
 
 # Messages
-from resources import ACCOUNT_DOES_NOT_EXIST, EVENT_DOES_NOT_EXIST, EVENT_SUCCESSFULLY_DELETED, EVENT_SUCCESSFULLY_UPDATED, EXTENTION_ERROR, SERVER_ERROR
+from resources import (
+    ACCOUNT_DOES_NOT_EXIST, EVENT_DOES_NOT_EXIST, EVENT_SUCCESSFULLY_DELETED,
+    EVENT_SUCCESSFULLY_UPDATED, EXTENTION_ERROR, SERVER_ERROR)
 
 
 class EventStore(Resource):
@@ -29,8 +31,8 @@ class EventStore(Resource):
         try:
             event.save()
             return event.json(), 201
-        except Exception:
-            abort(500, SERVER_ERROR)
+        except Exception as e:
+            abort(500, SERVER_ERROR.format(type(e).__name__))
 
 
 class EventParticipant(Resource):
@@ -52,8 +54,8 @@ class EventParticipant(Resource):
                         event.remaining_places -= 1
                         event.save()
                         return {"message": "Inscription terminée avec succès."}, 201
-                    except Exception:
-                        abort(500, SERVER_ERROR)
+                    except Exception as e:
+                        abort(500, SERVER_ERROR.format(type(e).__name__))
                 abort(400, message='Vous êtes déjà inscrit à cet événement.')
             abort(404, message=ACCOUNT_DOES_NOT_EXIST)
         abort(401, message="Désolé, il n'y a plus de places disponibles pour cet événement.")
@@ -75,8 +77,8 @@ class EventParticipant(Resource):
                         event.remaining_places += 1
                         event.save()
                         return {"message": "Inscription retirée avec succès."}, 201
-                    except Exception:
-                        abort(500, message=SERVER_ERROR)
+                    except Exception as e:
+                        abort(500, message=SERVER_ERROR.format(type(e).__name__))
                 abort(400, message="Désolé, vous n'êtes pas inscrit à cet événement.")
             abort(404, message=ACCOUNT_DOES_NOT_EXIST)
         abort(404, message=EVENT_DOES_NOT_EXIST)
@@ -120,8 +122,8 @@ class Event(Resource):
             try:
                 event.save()
                 return {'message': EVENT_SUCCESSFULLY_UPDATED}
-            except Exception:
-                abort(500, message=SERVER_ERROR)
+            except Exception as e:
+                abort(500, message=SERVER_ERROR.format(type(e).__name__))
         abort(400, message=EVENT_DOES_NOT_EXIST)
 
     @classmethod
@@ -132,10 +134,11 @@ class Event(Resource):
         event = EventModel.find_without_active(_id=_id)
         if event:
             try:
-                event.delete()
+                event.deleted = True
+                event.save()
                 return {'message': EVENT_SUCCESSFULLY_DELETED}
-            except Exception:
-                abort(500, message=SERVER_ERROR)
+            except Exception as e:
+                abort(500, message=SERVER_ERROR.format(type(e).__name__))
         abort(400, message=EVENT_DOES_NOT_EXIST)
 
 
@@ -153,8 +156,8 @@ class EventPublication(Resource):
             try:
                 event.save()
                 return {'message': EVENT_SUCCESSFULLY_UPDATED}
-            except Exception:
-                abort(500, message=SERVER_ERROR)
+            except Exception as e:
+                abort(500, message=SERVER_ERROR.format(type(e).__name__))
         abort(400, message=EVENT_DOES_NOT_EXIST)
 
 
@@ -186,8 +189,8 @@ class EventAuthorization(Resource):
             try:
                 event_found.save()
                 return {'message': EVENT_SUCCESSFULLY_UPDATED}
-            except Exception:
-                abort(500, message=SERVER_ERROR)
+            except Exception as e:
+                abort(500, message=SERVER_ERROR.format(type(e).__name__))
         abort(400, message=EVENT_DOES_NOT_EXIST)
 
 

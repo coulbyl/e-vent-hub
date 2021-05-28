@@ -58,8 +58,8 @@ class UserRegister(Resource):
                 'token': {'access_token': access_token, 'refresh_token': refresh_token},
                 'message': ACCOUNT_SUCCESSFULLY_CREATED
             }, 201
-        except Exception:
-            abort(500, message=SERVER_ERROR)
+        except Exception as e:
+            abort(500, message=SERVER_ERROR.format(type(e).__name__))
 
 
 class UserFavouriteEvent(Resource):
@@ -75,8 +75,8 @@ class UserFavouriteEvent(Resource):
                 try:
                     user.add_favourite(event)
                     return {"message": "Événement ajouté à votre liste de favoris."}, 201
-                except Exception:
-                    abort(500, message=SERVER_ERROR)
+                except Exception as e:
+                    abort(500, message=SERVER_ERROR.format(type(e).__name__))
             abort(404, message=EVENT_DOES_NOT_EXIST)
         abort(404, message=ACCOUNT_DOES_NOT_EXIST)
 
@@ -91,8 +91,8 @@ class UserFavouriteEvent(Resource):
                 try:
                     user.remove_favourite(event)
                     return {"message": "Événement retiré à votre liste de favoris."}, 201
-                except Exception:
-                    abort(500, message=SERVER_ERROR)
+                except Exception as e:
+                    abort(500, message=SERVER_ERROR.format(type(e).__name__))
             abort(404, message=EVENT_DOES_NOT_EXIST)
         abort(404, message=ACCOUNT_DOES_NOT_EXIST)
 
@@ -130,8 +130,8 @@ class User(Resource):
             try:
                 user_found.save()
                 return {'message': ACCOUNT_SUCCESSFULLY_UPDATED}
-            except Exception:
-                abort(500, message=SERVER_ERROR)
+            except Exception as e:
+                abort(500, message=SERVER_ERROR.format(type(e).__name__))
         abort(400, message=ACCOUNT_DOES_NOT_EXIST)
 
     @classmethod
@@ -142,10 +142,11 @@ class User(Resource):
         user = UserModel.find_by_id(_id=_id)
         if user:
             try:
-                user.delete()
+                user.deleted = True
+                user.save()
                 return {'message': ACCOUNT_SUCCESSFULLY_DELETED}
-            except Exception:
-                abort(500, message=SERVER_ERROR)
+            except Exception as e:
+                abort(500, message=SERVER_ERROR.format(type(e).__name__))
         abort(400, message=ACCOUNT_DOES_NOT_EXIST)
 
 
@@ -228,6 +229,6 @@ class UserActivation(Resource):
             try:
                 user.save()
                 return {'message': ACCOUNT_SUCCESSFULLY_UPDATED}
-            except Exception:
-                abort(500, message=SERVER_ERROR)
+            except Exception as e:
+                abort(500, message=SERVER_ERROR.format(type(e).__name__))
         abort(400, message=ACCOUNT_DOES_NOT_EXIST)

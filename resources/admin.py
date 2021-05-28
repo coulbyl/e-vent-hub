@@ -58,8 +58,8 @@ class AdminRegister(Resource):
                 'user': admin.json(),
                 'message': ACCOUNT_SUCCESSFULLY_CREATED
             }, 201
-        except Exception:
-            abort(500, message=SERVER_ERROR)
+        except Exception as e:
+            abort(500, message=SERVER_ERROR.format(type(e).__name__))
 
 
 class Admin(Resource):
@@ -88,8 +88,8 @@ class Admin(Resource):
             try:
                 admin_found.save()
                 return {'message': ACCOUNT_SUCCESSFULLY_UPDATED}
-            except Exception:
-                abort(500, message=SERVER_ERROR)
+            except Exception as e:
+                abort(500, message=SERVER_ERROR.format(type(e).__name__))
         abort(400, message=ACCOUNT_DOES_NOT_EXIST)
 
     @classmethod
@@ -102,8 +102,8 @@ class Admin(Resource):
             try:
                 admin.delete()
                 return {'message': ACCOUNT_SUCCESSFULLY_DELETED}
-            except Exception:
-                abort(500, message=SERVER_ERROR)
+            except Exception as e:
+                abort(500, message=SERVER_ERROR.format(type(e).__name__))
         abort(400, message=ACCOUNT_DOES_NOT_EXIST)
 
 
@@ -132,8 +132,8 @@ class AdminPasswordReset(Resource):
                 try:
                     admin_found.save()
                     return {'message': 'Mot de passe réinitialisé avec succès.'}
-                except Exception:
-                    abort(500, message=SERVER_ERROR)
+                except Exception as e:
+                    abort(500, message=SERVER_ERROR.format(type(e).__name__))
             abort(400, message="Un problème est survenu. Vérifiez votre mot de passe.")
         abort(400, message=ACCOUNT_DOES_NOT_EXIST)
 
@@ -171,6 +171,6 @@ class AdminRole(Resource):
             try:
                 admin_found.save()
                 return {'message': ACCOUNT_SUCCESSFULLY_UPDATED}
-            except Exception:
-                abort(500, message=SERVER_ERROR)
+            except Exception as e:
+                abort(500, message=SERVER_ERROR.format(type(e).__name__))
         abort(400, message=ACCOUNT_DOES_NOT_EXIST)

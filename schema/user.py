@@ -13,6 +13,7 @@ class UserSchema(ma.Schema):
             # 'favourite_events',
             'active',
             'created_at',
-            'updated_at'
+            'updated_at',
+            'deleted'
         )
     #favourite_events = ma.Nested(EventSchema, many=True)

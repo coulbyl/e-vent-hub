@@ -15,7 +15,7 @@ class OrganizerModel(db.Model):
     password = db.Column(db.String(120), nullable=False)
     photo = db.Column(db.String(120))
     active = db.Column(db.Boolean, default=True, nullable=False)
-    events = db.relationship('EventModel', lazy=True)
+    events = db.relationship('EventModel', lazy=True, cascade='all,delete')
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime)
 
