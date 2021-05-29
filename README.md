@@ -2,7 +2,7 @@
 
 Api to manage events.
 
-### Implementation
+## Implementation
 
 This project is implemented using Flask, Flask-RESTful, Flask-JWT-Extended, Flask-SQLALchemy, and Flask-Migrate.
 
@@ -14,25 +14,29 @@ After cloning the repository.
 
 - Install virtual environment.
 
-```
+```bash
+#!/bin/bash
 py -m venv .venv
 ```
 
 - Activate venv on windows with git bash or cmd | remove "source" for cmd.
 
-```
+```bash
+#!/bin/bash
 source .venv\\Scripts\\activate
 ```
 
 - Install all packages from the requirements file.
 
-```
+```bash
+#!/bin/bash
 pip install -r requirements.txt
 ```
 
 - Dotenv (.env) activation
 
-```
+```bash
+#!/bin/bash
 cp .env.example .env
 ```
 
@@ -40,14 +44,16 @@ and update the `.env` file with your data
 
 - Run the migrations and seeder.
 
-```
+```bash
+#!/bin/bash
 py manage.py db upgrade
 py manage.py admin_seeder
 ```
 
 - Run the app.
 
-```
+```bash
+#!/bin/bash
 flask run
 ```
 
@@ -55,7 +61,8 @@ flask run
 
 At the root of the project, type the following commands in your terminal or create these folders manually.
 
-```
+```bash
+#!/bin/bash
 mkdir uploads
 mkdir uploads/client
 mkdir uploads/event
@@ -68,7 +75,7 @@ The complete documentation is available on Postman.
 
 - POST
 
-```
+```txt
 /user/register
 /user/login
 /organizer/register
@@ -80,7 +87,7 @@ The complete documentation is available on Postman.
 
 - GET, PUT and DELETE
 
-```
+```txt
 /users
 /organizers
 /admins
