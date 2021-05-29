@@ -21,17 +21,20 @@ def json_dump_(datetime_object):
     return json.dumps(datetime_object, default=json_serializer).replace('"', '')
 
 
-def generate_uuid():
+def generate_uuid() -> str:
+    """Generates a unique identifier in string form. The length is 8."""
     return str(uuid4())[:8]
 
 
 def saveFileUploaded(fileStorage, subFolder: str):
+    """Persists an uploaded file in the uploads folder and generates a custom file name."""
     filename = f"{generate_uuid()}{os.path.splitext(fileStorage.filename)[1]}"
     if allowed_file(fileStorage.filename):
         fileStorage.save(os.path.join(f"{UPLOAD_FOLDER}/{subFolder}", filename))
         return filename
 
 
-def remove_file_upload(file_path):
+def remove_file_upload(file_path) -> None:
+    """Delete the existing files in the uploads folder."""
     if os.path.exists(file_path):
         os.remove(file_path)
